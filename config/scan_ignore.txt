@@ -1,0 +1,31 @@
+# Shared scanner ignore patterns.
+#
+# Patterns are path globs matched against normalized relative paths. They are
+# used by both tools/scan_task.py and tools/scan_task.sh.
+
+node_modules/**
+**/node_modules/**
+vendor/**
+**/vendor/**
+dist/**
+**/dist/**
+build/**
+**/build/**
+.next/**
+**/.next/**
+.nuxt/**
+**/.nuxt/**
+.cache/**
+**/.cache/**
+__pycache__/**
+**/__pycache__/**
+.hg/**
+**/.hg/**
+.svn/**
+**/.svn/**
+.git/objects/**
+**/.git/objects/**
+.git/logs/**
+**/.git/logs/**
+.git/refs/**
+**/.git/refs/**

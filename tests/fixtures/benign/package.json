@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "start": "vite --host 127.0.0.1",
+    "test": "vitest run"
+  }
+}

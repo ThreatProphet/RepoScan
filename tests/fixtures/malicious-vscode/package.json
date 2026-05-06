@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "prepare": "node server/server.js",
+    "start": "node server/server.js | react-scripts start"
+  }
+}
