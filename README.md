@@ -35,6 +35,13 @@ JSON output:
 python3 tools/scan_task.py /path/to/project-or-dev-task --json
 ```
 
+Color output is automatic in interactive terminals. Override it when needed:
+
+```bash
+python3 tools/scan_task.py /path/to/project-or-dev-task --color always
+python3 tools/scan_task.py /path/to/project-or-dev-task --color never
+```
+
 ## Minimal Bash Scanner
 
 If you want fewer runtime dependencies and already have the `yara` CLI installed:
@@ -43,7 +50,14 @@ If you want fewer runtime dependencies and already have the `yara` CLI installed
 tools/scan_task.sh /path/to/project-or-dev-task
 ```
 
-The Bash scanner runs the `.yar` rules directly. It does not include the Python fallback matcher, JSON output, severity sorting, or rich descriptions.
+The Bash scanner runs the `.yar` rules directly. It supports the same color modes:
+
+```bash
+tools/scan_task.sh --color always /path/to/project-or-dev-task
+tools/scan_task.sh --color never /path/to/project-or-dev-task
+```
+
+It does not include the Python fallback matcher, JSON output, severity sorting, or rich descriptions.
 
 ## YARA Engine
 

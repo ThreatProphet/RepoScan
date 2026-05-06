@@ -20,6 +20,36 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RULES = ROOT / "rules"
 DEFAULT_IGNORE_CONFIG = ROOT / "config" / "scan_ignore.txt"
 SEVERITY_SCORE = {"critical": 90, "high": 70, "medium": 40, "low": 10}
+SEVERITY_LABEL = {
+    "critical": "CRITICAL",
+    "high": "HIGH",
+    "medium": "MEDIUM",
+    "low": "LOW",
+}
+
+
+class Colors:
+    def __init__(self, enabled: bool) -> None:
+        self.enabled = enabled
+        self.reset = "\033[0m" if enabled else ""
+        self.bold = "\033[1m" if enabled else ""
+        self.dim = "\033[2m" if enabled else ""
+        self.red = "\033[31m" if enabled else ""
+        self.yellow = "\033[33m" if enabled else ""
+        self.blue = "\033[34m" if enabled else ""
+        self.green = "\033[32m" if enabled else ""
+        self.gray = "\033[90m" if enabled else ""
+
+    def wrap(self, text: str, color: str) -> str:
+        return f"{color}{text}{self.reset}" if self.enabled else text
+
+
+def color_enabled(mode: str) -> bool:
+    if mode == "always":
+        return True
+    if mode == "never":
+        return False
+    return sys.stdout.isatty() and os.environ.get("NO_COLOR") is None
 
 
 @dataclass(frozen=True)
@@ -374,18 +404,55 @@ def summarize(findings: list[Finding]) -> tuple[str, int]:
     return "no-findings", 0
 
 
-def print_text(findings: list[Finding], verdict: str, exit_code: int) -> None:
-    print(f"Verdict: {verdict}")
+def severity_color(severity: str, colors: Colors) -> str:
+    return {
+        "critical": colors.red,
+        "high": colors.yellow,
+        "medium": colors.blue,
+        "low": colors.gray,
+    }.get(severity, colors.gray)
+
+
+def verdict_color(verdict: str, colors: Colors) -> str:
+    return {
+        "malicious-likely": colors.red,
+        "suspicious": colors.yellow,
+        "review-needed": colors.blue,
+        "no-findings": colors.green,
+    }.get(verdict, colors.gray)
+
+
+def print_text(findings: list[Finding], verdict: str, exit_code: int, engine: str, target: Path, colors: Colors) -> None:
+    verdict_text = colors.wrap(verdict, colors.bold + verdict_color(verdict, colors))
+    print(colors.wrap("RepoScan", colors.bold))
+    print(f"Target:   {target}")
+    print(f"Engine:   {engine}")
+    print(f"Verdict:  {verdict_text}")
     print(f"Findings: {len(findings)}")
     if not findings:
-        print("No matching developer-task malware patterns were found.")
+        print()
+        print(colors.wrap("No matching developer-task malware patterns were found.", colors.green))
         return
 
     ordered = sorted(findings, key=lambda f: (-SEVERITY_SCORE.get(f.severity, 0), f.path, f.rule))
+    print()
+    current_severity = None
     for finding in ordered:
-        desc = f" - {finding.description}" if finding.description else ""
-        print(f"[{finding.severity.upper()}] {finding.rule} in {finding.path} ({finding.source}){desc}")
-    print(f"Exit code: {exit_code}")
+        if finding.severity != current_severity:
+            current_severity = finding.severity
+            label = SEVERITY_LABEL.get(finding.severity, finding.severity.upper())
+            colored_label = colors.wrap(label, colors.bold + severity_color(finding.severity, colors))
+            print(f"{colored_label}")
+        rule = colors.wrap(finding.rule, colors.bold)
+        path = colors.wrap(finding.path, colors.blue)
+        source = colors.wrap(finding.source, colors.gray)
+        print(f"  - {rule}")
+        print(f"    path:   {path}")
+        print(f"    source: {source}")
+        if finding.description:
+            print(f"    why:    {finding.description}")
+    print()
+    print(colors.wrap(f"Exit code: {exit_code}", colors.dim))
 
 
 def main() -> int:
@@ -394,6 +461,7 @@ def main() -> int:
     parser.add_argument("--rules", type=Path, default=DEFAULT_RULES, help="Directory containing .yar files")
     parser.add_argument("--ignore-config", type=Path, default=DEFAULT_IGNORE_CONFIG, help="Shared ignore pattern file")
     parser.add_argument("--json", action="store_true", help="Emit JSON instead of text")
+    parser.add_argument("--color", choices=("auto", "always", "never"), default="auto", help="Colorize text output")
     parser.add_argument("--max-size", type=int, default=2 * 1024 * 1024, help="Maximum file size to scan")
     parser.add_argument("--strict-yara", action="store_true", help="Fail if neither yara-python nor yara CLI is available")
     args = parser.parse_args()
@@ -431,11 +499,10 @@ def main() -> int:
     if args.json:
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
+        display_engine = engine
         if engine == "lite-fallback":
-            print("Engine: lite-fallback (install yara-python or yara CLI for real YARA matching)")
-        else:
-            print(f"Engine: {engine}")
-        print_text(findings, verdict, exit_code)
+            display_engine = "lite-fallback (install yara-python or yara CLI for real YARA matching)"
+        print_text(findings, verdict, exit_code, display_engine, target, Colors(color_enabled(args.color)))
     return exit_code
 
 
