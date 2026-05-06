@@ -180,9 +180,10 @@ LITE_RULES = (
         "Code searches for wallet, seed, private-key, env, or credential files",
         (
             rx(br'(seed( phrase)?|mnemonic|recovery phrase|private[_-]?key|BEGIN (RSA|OPENSSH|EC|PRIVATE) KEY|\.env|\.ssh|\.aws/credentials|wallet|metamask|phantom|keystore|ledger|trezor)'),
-            rx(br'(readdirSync|walkSync|recursive|find[ \t]+.*-type[ \t]+f|os\.homedir|process\.env\.HOME|upload|axios\.post|fetch[ \t]*\(|form-data|FormData)'),
+            rx(br'(readdirSync|walkSync|recursive|find[ \t]+.*-type[ \t]+f|os\.homedir|process\.env\.HOME)'),
+            rx(br'(upload|axios\.post|fetch[ \t]*\(|form-data|FormData)'),
         ),
-        2,
+        3,
     ),
     LiteRule(
         "TP_DevelTask_Clipboard_C2_Control",
