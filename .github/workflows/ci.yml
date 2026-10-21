@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install verification dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes shellcheck yara
+          python -m pip install --upgrade pip
+          python -m pip install --editable '.[dev,yara]'
+      - name: Python static checks
+        run: |
+          ruff check tools tests
+          python -m compileall -q tools tests
+      - name: Bash lint
+        run: shellcheck tools/scan_task.sh
+      - name: Compile YARA rules
+        run: yara -w rules/developer_task_malware.yar /dev/null
+      - name: Test
+        run: pytest
