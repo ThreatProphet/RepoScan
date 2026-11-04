@@ -1,195 +1,142 @@
 # RepoScan
 
-RepoScan is a YARA-based triage tool for suspicious developer assignments, interview tasks, and untrusted codebases.
+**Inspect an unfamiliar repository before you trust, install, or run it.**
 
-The rules are derived from ThreatProphet incident reporting on malicious developer-task lures. The reports are not stored in this repository; use the public archive at [threatprophet.com](https://threatprophet.com/) for the source writeups and context behind the `TP-2026-*` references in the rule metadata.
+RepoScan helps developers find suspicious execution triggers, concealed code,
+and patterns observed in malicious developer projects. It combines YARA rules
+derived from [ThreatProphet investigations](https://threatprophet.com/) with
+static review checks for Git and VS Code configuration, obfuscation, and risky
+code constructs.
 
-The rules focus on repeated behavior rather than fragile one-off IOCs:
+Findings identify what to inspect and why. A review warning does not require a
+complete execution chain, and a scan with no findings does not establish that a
+project is safe.
 
-- VS Code `runOn: folderOpen` task abuse with pipe-to-shell commands
-- npm lifecycle hooks that launch hidden server-side execution chains
-- remote payload fetch plus `new Function`, `Function.constructor`, or `eval`
-- known `AUTH_API` / full `process.env` exfiltration patterns
-- generalized base64-encoded URL hiding in `.env`, JSON, or JavaScript config
-- downloaded remote content piped or passed directly to shells/interpreters
-- local `.git/hooks` fetching remote scripts from delivered tasks
-- browser, wallet, clipboard, and Socket.IO collection primitives
-- horizontal whitespace used to push loader code off-screen
-- hidden or encoded PowerShell
+**Development status:** version 0.2.0 candidate. A license has not yet been
+selected; that decision remains a release blocker.
 
-## Quick Start
+## Install and scan
 
-```bash
-python3 tools/scan_task.py /path/to/project-or-dev-task
-```
-
-Exit codes:
-
-- `0`: no findings
-- `1`: suspicious or review-needed findings
-- `2`: critical findings, malicious likely
-- `64`: invalid target or configuration
-- `69`: requested canonical YARA engine is unavailable
-- `70`: operational failure or incomplete scan
-
-Finding exit codes (`0`-`2`) are emitted only for complete scans. An unreadable
-file, resource-limit breach, rule compilation error, or engine failure is an
-operational failure; it is never reported as a clean verdict.
-
-JSON output:
+Use Python 3.10 or later on Linux. These installation commands apply to a trusted
+RepoScan checkout containing this version:
 
 ```bash
-python3 tools/scan_task.py /path/to/project-or-dev-task --json
+python3 -m venv .venv
+.venv/bin/python -m pip install '.[yara]'
+.venv/bin/reposcan --version
+.venv/bin/reposcan /path/to/unfamiliar-project
 ```
 
-Color output is automatic in interactive terminals. Override it when needed:
+The scanner reads the target as data. It does not install its dependencies, run
+its setup commands, invoke its Git hooks, execute decoded source, or fetch
+payloads. Run it before enabling workspace tasks or following the project's
+installation and startup instructions.
+
+Save a report outside the target directory:
 
 ```bash
-python3 tools/scan_task.py /path/to/project-or-dev-task --color always
-python3 tools/scan_task.py /path/to/project-or-dev-task --color never
+.venv/bin/reposcan /path/to/unfamiliar-project --format markdown > review.md
+.venv/bin/reposcan /path/to/unfamiliar-project --format json > review.json
 ```
 
-## Bash compatibility wrapper
+`--json` remains an alias for JSON output. Source-checkout entry points remain
+available as `.venv/bin/python tools/scan_task.py` and `tools/scan_task.sh`, with
+the same arguments. The Bash wrapper uses `python3` from `PATH`; activate the
+RepoScan environment before using it. Use `.venv/bin/reposcan --help` for the
+full CLI reference.
 
-The Bash entry point preserves the established invocation style while delegating
-all discovery, engine, output, and error handling to the Python scanner:
+## What it looks for
+
+| Category | Examples | Interpretation |
+| --- | --- | --- |
+| Execution triggers | Folder-open tasks, supplied Git hooks and configuration, package lifecycle commands | A developer action may activate this command or referenced file. |
+| Obfuscation | Character-code arrays, decoder tables, encoded commands, off-screen code | Concealed content deserves inspection, even when its behavior is unresolved. |
+| Suspicious behavior | Download-and-execute patterns, dynamic evaluation, hidden processes, credential collection patterns | The construct or combination creates a reason to pause before proceeding. |
+| Report patterns | Tested mechanisms from previous ThreatProphet investigations, including Web3Market | The source resembles a documented technique; this is not actor attribution. |
+
+See the [detection guide](docs/detections.md) for coverage and limits.
+
+## Read a finding
+
+Each finding includes its rule, category, severity, confidence, relative file
+path, available byte evidence locations, a SHA-256 of the scanned file bytes,
+and a stable finding identifier. Trigger checks explain the relevant action and
+prerequisites. Report-derived rules retain report identifiers and available
+source references. Reports identify source locations without copying source
+snippets or decoded content.
+
+**Severity** expresses potential impact or review urgency. **Confidence**
+expresses the strength of the matched evidence. A high-impact operation can
+still have uncertain purpose. Quoted documentation, an intentional updater, or
+an obfuscated dependency can warrant a warning without establishing malware.
+
+| Exit code | Meaning |
+| --- | --- |
+| `0` | No findings in the configured scan scope |
+| `1` | Review warnings, or explicit Lite heuristic findings |
+| `2` | A critical, high-confidence canonical pattern; verdict `high-risk` |
+| `64` | Invalid arguments, target, or configuration |
+| `69` | Requested canonical YARA engine unavailable |
+| `70` | Operational failure or incomplete scan |
+
+Exit codes `0`–`2` apply only to complete scans. Inspect `complete`, `status`, and
+`errors` in machine-readable output; an operational failure is not a clean
+result. Completeness describes the scan operation, not complete understanding
+of the code. `REVIEW_Analysis_Limit` and `REVIEW_Configuration_Unparsed` flag
+unresolved analysis even when the scan finishes. The strongest verdict is a
+reason to pause and inspect, not proof of successful execution or compromise.
+
+## Engines and scope
+
+The default `auto` mode selects `yara-python`, then the `yara` CLI. If neither is
+available, it exits with `69`; it does not silently fall back to heuristics.
 
 ```bash
-tools/scan_task.sh /path/to/project-or-dev-task
+.venv/bin/reposcan /path/to/project --engine yara-python
+.venv/bin/reposcan /path/to/project --engine yara-cli
+.venv/bin/reposcan /path/to/project --engine lite
 ```
 
-It accepts the same options as the Python scanner and propagates its standard
-output, standard error, and exit code unchanged:
+Bundled canonical rules use `TP_DevelTask_*` IDs. Explicit Lite matches use `HEUR_*`
+IDs and the `heuristic-findings` verdict. Common static review findings use
+`REVIEW_*` IDs in every engine. Lite never emits canonical YARA findings or the
+canonical `high-risk` verdict. `--lite` and `--strict-yara` remain compatibility
+options.
+
+The default policy skips dependency/build directories, symlinks, special files,
+and oversized files. It preserves inspection of supplied `.git/hooks` and
+`.git/config`. A complete scan means the eligible set was processed; the result
+also reports coverage and policy skips. See [design and scope](docs/design.md)
+for resource bounds, platform support, and the limits of static review.
+
+## Reproduce the Web3Market example
+
+From this checkout, scan the reduced, inert fixture as data:
 
 ```bash
-tools/scan_task.sh --color always /path/to/project-or-dev-task
-tools/scan_task.sh --color never /path/to/project-or-dev-task
+.venv/bin/reposcan tests/fixtures/web3market-entry --engine yara-python --format markdown
 ```
 
-The wrapper does not interpret target names or implement a second scanner.
+A finding exit code is expected. Do not run the fixture content. The
+[case study](docs/web3market.md) explains how the published report became a
+detector, what the signature establishes, and what remains unresolved.
 
-## YARA Engine
+Captured example outputs: [Markdown](examples/web3market.md),
+[JSON](examples/web3market.json), and [text](examples/web3market.txt).
 
-Canonical YARA is the default. In `auto` mode the scanner uses engines in this
-order:
-
-1. `yara-python`, if installed
-2. `yara` CLI, if installed
-
-If neither is available, the scan fails with exit code `69`. Canonical engine or
-rule failures do not trigger heuristic matching. Select an engine explicitly
-when reproducibility requires it:
+## Develop and contribute
 
 ```bash
-python3 tools/scan_task.py /path/to/project --engine yara-python
-python3 tools/scan_task.py /path/to/project --engine yara-cli
+.venv/bin/python -m pip install --editable '.[dev,yara]'
+.venv/bin/python -m pytest
+.venv/bin/python -m ruff check src tools tests
 ```
 
-`--strict-yara` remains as a deprecated compatibility option for canonical-only
-behavior.
+Full adapter verification also requires the YARA CLI; Bash linting requires
+ShellCheck. Missing dependencies are reported as skipped or not run, never as
+successful verification. CI configuration describes the intended verification
+matrix; a workflow file alone is not evidence of a successful run.
 
-### Explicit heuristic mode
-
-The lite matcher is available only by explicit opt-in:
-
-```bash
-python3 tools/scan_task.py /path/to/project --engine lite
-# compatibility alias
-python3 tools/scan_task.py /path/to/project --lite
-```
-
-Lite mode is a heuristic triage mode, not a YARA implementation. Its findings
-use `HEUR_*` identifiers and the `heuristic-findings` verdict; it never emits
-canonical `TP_DevelTask_*` rule identifiers or a `malicious-likely` verdict.
-
-Install one of:
-
-```bash
-python3 -m pip install yara-python
-# or install the yara command-line package with your OS package manager
-```
-
-## Rules
-
-The main rule file is:
-
-```text
-rules/developer_task_malware.yar
-```
-
-Rule metadata keeps the relevant ThreatProphet report IDs, such as `TP-2026-001` and `TP-2026-011`, so you can map detections back to the public analysis.
-
-The scanner (and therefore its Bash wrapper) reads shared ignore patterns from:
-
-```text
-config/scan_ignore.txt
-```
-
-Override it when needed:
-
-```bash
-python3 tools/scan_task.py /path/to/project --ignore-config config/scan_ignore.txt
-tools/scan_task.sh --ignore-config config/scan_ignore.txt /path/to/project
-```
-
-These are triage rules. Treat matches as prompts for review, containment, or sandboxing. A clean result does not prove a task is safe, especially if the project uses unusual build tooling, generated code, encrypted blobs, or remote dependencies.
-
-## Discovery and scan completeness
-
-RepoScan admits regular files using filesystem metadata without following
-symlinks. Symlinks, FIFOs, sockets, device nodes, and unsupported filesystem
-entries are skipped and accounted for. Directory traversal and JSON lists are
-sorted for deterministic output. Ignore patterns match normalized paths relative
-to the scan root.
-
-Resource use is bounded with positive-value options:
-
-```bash
-python3 tools/scan_task.py /path/to/project \
-  --max-size 2097152 \
-  --max-files 10000 \
-  --max-entries 100000 \
-  --max-total-bytes 268435456 \
-  --timeout 30
-```
-
-JSON output includes `complete`, `status`, `errors`, and `stats`. Policy skips
-such as ignored, special, symlink, and oversized entries are accounted for but
-do not make a scan incomplete. Discovery, read, engine, timeout, and resource
-limit failures do.
-
-## Platform support
-
-Linux is the baseline supported and CI-tested platform. Safe scanning depends
-on POSIX descriptor-relative filesystem operations, including no-follow and
-directory-only opens.
-
-macOS support is conditional on native verification of those filesystem
-primitives and the complete test suite. Native Windows is unsupported; use a
-supported Linux environment instead.
-
-## Verify Locally
-
-```bash
-python3 -m pip install --editable '.[dev,yara]'
-pytest
-ruff check tools tests
-python3 -m compileall -q tools tests
-shellcheck tools/scan_task.sh
-yara -w rules/developer_task_malware.yar /dev/null
-```
-
-The test fixtures under `tests/fixtures/`, including
-`malicious-githook/pre-commit.fixture`, are inert scanner inputs. Verification
-reads them as data and must never execute JavaScript, shell, PowerShell, Git
-hooks, npm scripts, or build instructions from a fixture.
-
-The automated suite distinguishes unavailable YARA and shell-lint dependencies
-as skipped or not run; absence is not a successful verification result. CI
-installs both canonical YARA engines and ShellCheck before running the full
-suite.
-
-## Licensing
-
-No open-source license has been selected. Choosing and adding a license remains
-a project-owner decision and is a release blocker.
+See [contribution guidance](CONTRIBUTING.md), [security reporting](SECURITY.md),
+and the [changelog](CHANGELOG.md). No open-source license has been selected;
+license selection and distribution terms remain a project-owner decision.

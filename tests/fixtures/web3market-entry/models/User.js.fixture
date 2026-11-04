@@ -1,0 +1,7 @@
+// Inert literal-data fixture; the array spells https://example.invalid/.
+// Never execute this file. The scanner decodes bounded literal data only.
+const userlist = [
+  104, 116, 116, 112, 115, 58, 47, 47, 101, 120, 97, 109,
+  112, 108, 101, 46, 105, 110, 118, 97, 108, 105, 100, 47
+];
+module.exports = userlist;

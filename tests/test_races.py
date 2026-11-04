@@ -11,11 +11,11 @@ from types import ModuleType
 from typing import Any
 
 import pytest
-from conftest import SCANNER, assert_payload_shape
+from conftest import SCANNER, SCANNER_MODULE_PATH, assert_payload_shape
 
 
 def load_scanner_module() -> ModuleType:
-    spec = importlib.util.spec_from_file_location("reposcan_scanner_race_tests", SCANNER)
+    spec = importlib.util.spec_from_file_location("reposcan_scanner_race_tests", SCANNER_MODULE_PATH)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module

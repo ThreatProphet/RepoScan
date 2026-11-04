@@ -1,0 +1,433 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RepoScan result 1.0",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "tool",
+    "target",
+    "engine",
+    "engine_version",
+    "rule_pack",
+    "policy",
+    "coverage",
+    "complete",
+    "status",
+    "verdict",
+    "findings",
+    "errors",
+    "stats"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "tool": {
+      "type": "object",
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "const": "RepoScan"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "target": {
+      "type": "string"
+    },
+    "engine": {
+      "enum": [
+        "auto",
+        "yara-python",
+        "yara-cli",
+        "lite"
+      ]
+    },
+    "engine_version": {
+      "type": "string"
+    },
+    "rule_pack": {
+      "type": "object",
+      "required": [
+        "sha256",
+        "files"
+      ],
+      "properties": {
+        "sha256": {
+          "type": "string",
+          "pattern": "^([0-9a-f]{64})?$"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "sha256"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "policy": {
+      "type": "object",
+      "required": [
+        "max_size",
+        "max_files",
+        "max_total_bytes",
+        "max_entries",
+        "timeout",
+        "ignore_config_sha256"
+      ],
+      "properties": {
+        "max_size": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_files": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_total_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_entries": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "timeout": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ignore_config_sha256": {
+          "type": "string",
+          "pattern": "^([0-9a-f]{64})?$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "coverage": {
+      "type": "object",
+      "required": [
+        "scope",
+        "skipped",
+        "skipped_truncated"
+      ],
+      "properties": {
+        "scope": {
+          "type": "string"
+        },
+        "skipped": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "reason"
+            ],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "reason": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "maxItems": 128
+        },
+        "skipped_truncated": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "complete": {
+      "type": "boolean"
+    },
+    "status": {
+      "enum": [
+        "complete",
+        "partial",
+        "failed"
+      ]
+    },
+    "verdict": {
+      "enum": [
+        "no-findings",
+        "heuristic-findings",
+        "review-needed",
+        "high-risk",
+        "scan-incomplete",
+        "scan-failed",
+        "not-scanned"
+      ]
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "rule",
+          "severity",
+          "path",
+          "source",
+          "description",
+          "category",
+          "confidence",
+          "trigger",
+          "prerequisites",
+          "reports",
+          "references",
+          "evidence",
+          "evidence_truncated",
+          "sha256",
+          "finding_id"
+        ],
+        "properties": {
+          "rule": {
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          },
+          "path": {
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "yara-python",
+              "yara-cli",
+              "heuristic-lite",
+              "static-review"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "enum": [
+              "trigger",
+              "obfuscation",
+              "behavior",
+              "report-pattern"
+            ]
+          },
+          "confidence": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "trigger": {
+            "type": "string"
+          },
+          "prerequisites": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reports": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "identifier",
+                "offset",
+                "length",
+                "line"
+              ],
+              "properties": {
+                "identifier": {
+                  "type": "string"
+                },
+                "offset": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "length": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "line": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "additionalProperties": false
+            },
+            "maxItems": 32
+          },
+          "evidence_truncated": {
+            "type": "boolean"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "finding_id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "path"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "stats": {
+      "type": "object",
+      "required": [
+        "entries_seen",
+        "directories_visited",
+        "regular_files",
+        "files_selected",
+        "files_scanned",
+        "selected_bytes",
+        "ignored",
+        "skipped_symlinks",
+        "skipped_special",
+        "skipped_oversize",
+        "skipped_resource_limit"
+      ],
+      "properties": {
+        "entries_seen": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "directories_visited": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "regular_files": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "files_selected": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "files_scanned": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "selected_bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ignored": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skipped_symlinks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skipped_special": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skipped_oversize": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skipped_resource_limit": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "complete"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "complete": {
+            "const": true
+          },
+          "errors": {
+            "maxItems": 0
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "complete": {
+            "const": false
+          }
+        }
+      }
+    }
+  ]
+}
