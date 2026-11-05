@@ -150,6 +150,39 @@ those destinations on the basis of untrusted configuration.
 
 ## Output contract
 
+### Terminal presentation
+
+Text output starts with the verdict, finding and severity counts, and scan
+status. Each finding leads with its severity and file location, followed by the
+reason, applicable trigger prerequisites, and up to four evidence locations.
+The full rule ID, category, confidence, engine source, and report references
+remain available below the evidence. The location suffix uses the earliest
+recorded evidence line; the individual matches retain their exact positions.
+Additional recorded locations and collection limits are identified separately.
+
+Severity badges use the terminal's magenta, red, yellow, and blue palette for
+critical, high, medium, and low. Paths and evidence line numbers use cyan;
+YARA string identifiers use magenta. These are standard ANSI palette colors,
+so their exact appearance follows the user's terminal theme. Labels and
+ordering preserve the meaning when color is unavailable. No runtime rendering
+dependency is required.
+
+`--color auto` uses color only on a terminal when `NO_COLOR` is absent.
+`--color always` and `--color never` explicitly override automatic selection.
+Untrusted text is escaped before wrapping or applying style; filenames and
+rule metadata cannot inject terminal control sequences through this renderer.
+
+Text uses the terminal width up to 120 columns, or 100 columns for redirected
+output. `--width N` fixes the width between 40 and 240 columns. Continuation
+lines retain their field indentation; long tokens are split without truncation.
+Path fields preserve leading, trailing, and repeated spaces when wrapping.
+The width calculation accounts for wide and combining characters, although
+exact glyph rendering depends on the terminal and font. These options do not
+change JSON or Markdown output. Use those formats for structured consumption;
+the text layout may evolve.
+
+### Structured evidence
+
 JSON has `schema_version: "1.0"` and a packaged
 [schema](../src/reposcan/schemas/result.schema.json). It records tool and engine
 versions, rule-pack identity, effective policy, coverage, status, findings,
