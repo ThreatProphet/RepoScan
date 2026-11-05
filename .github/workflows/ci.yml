@@ -2,7 +2,9 @@ name: CI
 
 on:
   push:
+    branches: ["**"]
   pull_request:
+  workflow_call:
 
 permissions:
   contents: read
@@ -16,8 +18,10 @@ jobs:
       matrix:
         python: ["3.10", "3.12"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: ${{ matrix.python }}
           cache: pip
@@ -40,9 +44,17 @@ jobs:
       - name: Build distributions
         run: python -m build
       - name: Verify installed wheel outside checkout
-        run: python tools/verify_wheel.py dist/threatprophet_reposcan-0.2.0-py3-none-any.whl
+        shell: bash
+        run: |
+          wheels=(dist/*.whl)
+          [[ "${#wheels[@]}" -eq 1 && -f "${wheels[0]}" ]]
+          python tools/verify_wheel.py "${wheels[0]}"
       - name: Verify fresh pipx installation and native scans
-        run: python tools/verify_install.py dist/threatprophet_reposcan-0.2.0-py3-none-any.whl
+        shell: bash
+        run: |
+          wheels=(dist/*.whl)
+          [[ "${#wheels[@]}" -eq 1 && -f "${wheels[0]}" ]]
+          python tools/verify_install.py "${wheels[0]}"
       - name: Verify convenience installer outside checkout
         run: |
           install_test_dir=$(mktemp -d)
