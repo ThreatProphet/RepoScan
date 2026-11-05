@@ -44,10 +44,14 @@ flowchart TD
     D --> F["Versioned JSON"]
 ```
 
-The package keeps the established scan orchestration and safe reader, with
-separate evidence models, static review checks, and engine-support helpers.
-The legacy Python and Bash entry points delegate to the packaged implementation.
-They do not implement a second scanner.
+`scanner.scan` accepts typed options and returns a structured result without
+printing. The CLI owns argument parsing and presentation; separate modules own
+bounded filesystem access, rule snapshots, engine adapters, result finalization,
+and renderers. The [code architecture guide](architecture.md) maps those
+responsibilities, their dependencies, and the tests relevant to each change.
+
+The installed command, package-module invocation, and Python/Bash wrappers
+delegate to `cli.main`. `scanner.main` remains a compatibility delegate.
 
 Canonical YARA and Lite are different matching implementations. Common review
 checks augment both. YARA failure does not silently select Lite. Matching and

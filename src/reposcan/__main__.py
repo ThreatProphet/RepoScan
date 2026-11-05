@@ -1,3 +1,3 @@
-from reposcan.scanner import main
+from reposcan.cli import main
 
 raise SystemExit(main())

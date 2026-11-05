@@ -10,8 +10,8 @@ from pathlib import Path
 import pytest
 from conftest import FIXTURES, SCANNER, run_command
 
-from reposcan import scanner
-from reposcan.models import Evidence, Finding
+from reposcan import terminal
+from reposcan.models import Evidence, Finding, ScanError, ScanStats
 
 SGR = re.compile(r"\x1b\[[0-9;]*m")
 
@@ -37,16 +37,16 @@ def render(
     *,
     colored: bool = False,
     width: int = 100,
-    errors: list[scanner.ScanError] | None = None,
+    errors: list[ScanError] | None = None,
     verdict: str = "review-needed",
     exit_code: int = 1,
     status: str = "complete",
-    stats: scanner.ScanStats | None = None,
+    stats: ScanStats | None = None,
     target: Path = Path("/review/received-project"),
 ) -> str:
     output = io.StringIO()
     with redirect_stdout(output):
-        scanner.print_text(
+        terminal.print_text(
             findings,
             errors or [],
             verdict,
@@ -55,8 +55,8 @@ def render(
             target,
             status == "complete",
             status,
-            stats or scanner.ScanStats(files_selected=1, files_scanned=1),
-            scanner.Colors(colored),
+            stats or ScanStats(files_selected=1, files_scanned=1),
+            terminal.Colors(colored),
             width=width,
         )
     return output.getvalue()
@@ -67,15 +67,15 @@ def render(
 def test_color_mode_precedence(monkeypatch: pytest.MonkeyPatch, tty: bool, no_color: str | None) -> None:
     output = io.StringIO()
     monkeypatch.setattr(output, "isatty", lambda: tty)
-    monkeypatch.setattr(scanner.sys, "stdout", output)
+    monkeypatch.setattr(terminal.sys, "stdout", output)
     if no_color is None:
         monkeypatch.delenv("NO_COLOR", raising=False)
     else:
         monkeypatch.setenv("NO_COLOR", no_color)
 
-    assert scanner.color_enabled("always") is True
-    assert scanner.color_enabled("never") is False
-    assert scanner.color_enabled("auto") is (tty and no_color is None)
+    assert terminal.color_enabled("always") is True
+    assert terminal.color_enabled("never") is False
+    assert terminal.color_enabled("auto") is (tty and no_color is None)
 
 
 def test_color_only_changes_styling_and_each_finding_keeps_its_severity() -> None:
@@ -123,7 +123,7 @@ def test_untrusted_terminal_fields_are_escaped_before_styling_and_wrapping() -> 
         status="partial",
         verdict="scan-incomplete",
         exit_code=70,
-        errors=[scanner.ScanError("error-code" + hostile, "error-message" + hostile, "error-path" + hostile)],
+        errors=[ScanError("error-code" + hostile, "error-message" + hostile, "error-path" + hostile)],
     )
     plain = SGR.sub("", output)
 
@@ -185,7 +185,7 @@ def test_target_and_error_paths_keep_edge_spaces() -> None:
         [],
         target=Path("/review/trailing  "),
         status="failed",
-        errors=[scanner.ScanError("file-read", "Read failed", "  leading.js  ")],
+        errors=[ScanError("file-read", "Read failed", "  leading.js  ")],
     )
 
     assert "Target:   /review/trailing  \n" in output
@@ -200,8 +200,8 @@ def test_incomplete_results_keep_errors_coverage_and_actual_exit(status: str, ve
     output = render(
         [finding()] if status == "partial" else [],
         colored=True,
-        errors=[scanner.ScanError("file-read", "Read failed", "src/missing.js")],
-        stats=scanner.ScanStats(files_selected=2, files_scanned=1 if status == "partial" else 0),
+        errors=[ScanError("file-read", "Read failed", "src/missing.js")],
+        stats=ScanStats(files_selected=2, files_scanned=1 if status == "partial" else 0),
         status=status,
         verdict=verdict,
         exit_code=exit_code,
@@ -212,17 +212,17 @@ def test_incomplete_results_keep_errors_coverage_and_actual_exit(status: str, ve
     assert "file-read" in plain and "Read failed" in plain and "src/missing.js" in plain
     assert ("1/2" if status == "partial" else "0/2") in plain
     assert f"Exit code: {exit_code}" in plain
-    assert scanner.Colors(True).green not in output
+    assert terminal.Colors(True).green not in output
 
 
 def test_empty_scope_is_not_styled_as_a_successful_clean_scan() -> None:
-    output = render([], colored=True, verdict="no-findings", exit_code=0, stats=scanner.ScanStats())
+    output = render([], colored=True, verdict="no-findings", exit_code=0, stats=ScanStats())
     plain = SGR.sub("", output)
 
     assert "No file content was scanned." in plain
     assert "0/0" in plain
     assert "Exit code: 0" in plain
-    assert scanner.Colors(True).green not in output
+    assert terminal.Colors(True).green not in output
 
 
 @pytest.mark.parametrize("format_name", ["json", "markdown"])

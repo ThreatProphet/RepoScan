@@ -4,6 +4,10 @@
 
 ### Changed
 
+- Separated CLI presentation from a typed scan service, with dedicated
+  filesystem, rule-pack, engine, terminal, and result modules. Documented module
+  ownership and contribution paths. Existing CLI behavior, output contracts,
+  detections, and the `scanner.main` compatibility entry point are preserved.
 - Terminal findings now lead with severity and file location, followed by the
   reason and highlighted evidence. A severity-count summary supports triage;
   full rule IDs, confidence, trigger prerequisites, and evidence limits remain
