@@ -1,29 +1,17 @@
 from __future__ import annotations
 
-import importlib.util
 import json
 import os
 import sys
 import threading
 import time
 from pathlib import Path
-from types import ModuleType
 from typing import Any
 
 import pytest
-from conftest import SCANNER, SCANNER_MODULE_PATH, assert_payload_shape
+from conftest import SCANNER, assert_payload_shape
 
-
-def load_scanner_module() -> ModuleType:
-    spec = importlib.util.spec_from_file_location("reposcan_scanner_race_tests", SCANNER_MODULE_PATH)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
-SCANNER_MODULE = load_scanner_module()
+from reposcan import filesystem, scanner
 
 
 def run_main(
@@ -33,7 +21,7 @@ def run_main(
     *arguments: str,
 ) -> tuple[int, dict[str, Any]]:
     monkeypatch.setattr(sys, "argv", [str(SCANNER), "--json", *arguments, str(target)])
-    exit_code = SCANNER_MODULE.main()
+    exit_code = scanner.main()
     captured = capsys.readouterr()
     assert captured.err == ""
     payload = json.loads(captured.out)
@@ -42,14 +30,14 @@ def run_main(
 
 
 def mutate_after_discovery(monkeypatch: pytest.MonkeyPatch, mutation: Any) -> None:
-    original = SCANNER_MODULE.discover_files
+    original = filesystem.discover_files
 
     def wrapped(*args: Any, **kwargs: Any) -> Any:
         discovery = original(*args, **kwargs)
         mutation()
         return discovery
 
-    monkeypatch.setattr(SCANNER_MODULE, "discover_files", wrapped)
+    monkeypatch.setattr(filesystem, "discover_files", wrapped)
 
 
 def process_file_descriptors() -> set[int]:
@@ -180,7 +168,7 @@ def test_failed_reads_still_charge_the_aggregate_byte_budget(
     for name in ("a.txt", "b.txt", "c.txt"):
         (target / name).write_bytes(b"12345678")
 
-    original_read = SCANNER_MODULE.os.read
+    original_read = filesystem.os.read
     read_counts: dict[tuple[int, int], int] = {}
 
     def read_then_fail(descriptor: int, count: int) -> bytes:
@@ -192,7 +180,7 @@ def test_failed_reads_still_charge_the_aggregate_byte_budget(
             return original_read(descriptor, min(count, 4))
         raise OSError("injected read failure after bytes were consumed")
 
-    monkeypatch.setattr(SCANNER_MODULE.os, "read", read_then_fail)
+    monkeypatch.setattr(filesystem.os, "read", read_then_fail)
     exit_code, payload = run_main(
         monkeypatch,
         capsys,
@@ -232,7 +220,7 @@ def test_directory_identity_failures_do_not_leak_descriptors(tmp_path: Path) -> 
     before = process_file_descriptors()
 
     for _ in range(50):
-        discovery = SCANNER_MODULE.discover_files(
+        discovery = filesystem.discover_files(
             selected,
             expected_stat,
             max_size=1024,

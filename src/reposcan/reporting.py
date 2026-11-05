@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
+from dataclasses import asdict
 from typing import Any
+
+from reposcan import __version__
+from reposcan.models import ScanResult
+from reposcan.settings import SCHEMA_VERSION
 
 
 def escape_markdown(value: object) -> str:
@@ -95,3 +100,37 @@ def render_markdown(payload: dict[str, Any]) -> str:
     ])
     lines.extend(f"| {esc(key)} | {value} |" for key, value in payload["policy"].items() if isinstance(value, int))
     return "\n".join(lines) + "\n"
+
+
+def result_payload(result: ScanResult) -> dict[str, Any]:
+    """Serialize the established JSON/Markdown contract without performing I/O."""
+    stats_payload = asdict(result.stats)
+    skipped = stats_payload.pop("skip_details")
+    skipped_truncated = stats_payload.pop("skip_details_truncated")
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "tool": {"name": "RepoScan", "version": __version__},
+        "target": str(result.target),
+        "engine": result.engine,
+        "engine_version": result.engine_version,
+        "rule_pack": result.rule_pack,
+        "policy": {
+            "max_size": result.options.max_size,
+            "max_files": result.options.max_files,
+            "max_total_bytes": result.options.max_total_bytes,
+            "max_entries": result.options.max_entries,
+            "timeout": result.options.timeout,
+            "ignore_config_sha256": result.ignore_config_sha256,
+        },
+        "coverage": {
+            "scope": "Configured eligible files only; ignored entries may include pruned directories.",
+            "skipped": sorted(skipped, key=lambda item: (item["path"], item["reason"])),
+            "skipped_truncated": skipped_truncated,
+        },
+        "complete": result.complete,
+        "status": result.status,
+        "verdict": result.verdict,
+        "findings": [asdict(finding) for finding in result.findings],
+        "errors": [asdict(error) for error in result.errors],
+        "stats": stats_payload,
+    }

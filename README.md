@@ -219,6 +219,9 @@ files, local checks, and detection expectations. Use
 gaps, and false positives. For vulnerabilities in the scanner itself, follow
 [SECURITY.md](SECURITY.md).
 
+For code changes, the [architecture guide](docs/architecture.md) maps scan
+orchestration, engines, filesystem handling, and output to their modules and tests.
+
 Keep public examples small and sanitized. Do not execute a suspicious project
 to prepare a contribution, or attach private repositories, live payloads,
 credentials, or personal data to a public issue.
@@ -237,6 +240,7 @@ publishers' terms.
 - [Installation and maintenance](docs/installation.md)
 - [Detection guide](docs/detections.md)
 - [Design and trust boundary](docs/design.md)
+- [Code architecture](docs/architecture.md)
 - [Web3Market case study](docs/web3market.md)
 - [Contribution guide](CONTRIBUTING.md)
 - [Security reporting](SECURITY.md)

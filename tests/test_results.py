@@ -20,7 +20,9 @@ from conftest import (
 )
 from jsonschema import Draft202012Validator
 
-from reposcan import scanner
+from reposcan import engine_support, scanner
+from reposcan.engines import yara_cli, yara_python
+from reposcan.models import ScannableFile, ScanStats
 from reposcan.reporting import escape_markdown
 
 SCHEMA = json.loads(files("reposcan").joinpath("schemas/result.schema.json").read_text(encoding="utf-8"))
@@ -225,9 +227,9 @@ def test_lite_whitespace_regression_obeys_a_short_matching_budget(tmp_path: Path
 
 
 def test_cli_adapter_caps_combined_subprocess_output(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(scanner, "MAX_ENGINE_OUTPUT", 1024)
+    monkeypatch.setattr(yara_cli, "MAX_ENGINE_OUTPUT", 1024)
     with pytest.raises(OSError, match="output exceeded 1024 bytes"):
-        scanner.run_yara_cli([
+        yara_cli.run_yara_cli([
             sys.executable, "-c", "import os; os.write(1, b'x' * 800); os.write(2, b'x' * 800)",
         ], timeout=2)
 
@@ -239,8 +241,8 @@ def test_native_runtime_warning_cannot_produce_a_complete_file(
     target = tmp_path / "inert.txt"
     target.write_bytes(b"ordinary inert data")
     identity = target.stat()
-    candidate = scanner.ScannableFile(target, target.name, identity.st_dev, identity.st_ino)
-    stats = scanner.ScanStats()
+    candidate = ScannableFile(target, target.name, identity.st_dev, identity.st_ino)
+    stats = ScanStats()
 
     class WarningEngine:
         def match(self, **kwargs: Any) -> list[object]:
@@ -251,7 +253,7 @@ def test_native_runtime_warning_cannot_produce_a_complete_file(
                     raise
             return []
 
-    result = scanner.scan_with_yara_python(WarningEngine(), [candidate], 1024, 1024, 2, stats)
+    result = yara_python.scan_with_yara_python(WarningEngine(), [candidate], 1024, 1024, 2, stats)
     assert stats.files_scanned == 0
     assert result.findings == []
     assert len(result.errors) == 1
@@ -274,15 +276,15 @@ def test_cli_runtime_diagnostics_are_not_suppressed(
     target = tmp_path / "inert.txt"
     target.write_bytes(b"ordinary inert data")
     identity = target.stat()
-    candidate = scanner.ScannableFile(target, target.name, identity.st_dev, identity.st_ino)
-    stats = scanner.ScanStats()
+    candidate = ScannableFile(target, target.name, identity.st_dev, identity.st_ino)
+    stats = ScanStats()
 
     def fake_cli(command: list[str], timeout: int) -> subprocess.CompletedProcess[str]:
         assert "-w" not in command
         return subprocess.CompletedProcess(command, 0, "", diagnostic)
 
-    monkeypatch.setattr(scanner, "run_yara_cli", fake_cli)
-    result = scanner.scan_with_yara_cli("yara", [], [candidate], 1024, 1024, 2, stats, metadata={})
+    monkeypatch.setattr(yara_cli, "run_yara_cli", fake_cli)
+    result = yara_cli.scan_with_yara_cli("yara", [], [candidate], 1024, 1024, 2, stats, metadata={})
     assert stats.files_scanned == (1 if complete else 0)
     assert bool(result.errors) is not complete
     if result.errors:
@@ -304,7 +306,7 @@ def test_rule_snapshot_keeps_metadata_hash_and_matching_consistent(
     original.write_bytes(captured_source)
     target = tmp_path / "inert.txt"
     target.write_bytes(b"captured-marker\n")
-    read_metadata = scanner.load_rule_metadata
+    read_metadata = engine_support.load_rule_metadata
     temporary_paths: list[Path] = []
 
     def mutate_original_after_capture(paths: list[Path]) -> dict[str, dict[str, Any]]:
@@ -313,7 +315,7 @@ def test_rule_snapshot_keeps_metadata_hash_and_matching_consistent(
         original.write_text('rule Changed { meta: severity="low" condition: false }\n', encoding="utf-8")
         return metadata
 
-    monkeypatch.setattr(scanner, "load_rule_metadata", mutate_original_after_capture)
+    monkeypatch.setattr(engine_support, "load_rule_metadata", mutate_original_after_capture)
     monkeypatch.setattr(sys, "argv", [
         str(SCANNER), str(target), "--engine", engine, "--rules", str(rules), "--format", "json",
     ])

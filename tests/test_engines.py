@@ -1,31 +1,21 @@
 from __future__ import annotations
 
-import importlib.util
 import shutil
 import subprocess
-import sys
 from pathlib import Path
-from types import ModuleType
 
 import pytest
 from conftest import (
     FIXTURES,
     RULES,
-    SCANNER_MODULE_PATH,
     has_yara_cli,
     has_yara_python,
     parse_json_output,
     run_scanner,
 )
 
-
-def load_scanner_module() -> ModuleType:
-    spec = importlib.util.spec_from_file_location("reposcan_scanner_engine_tests", SCANNER_MODULE_PATH)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
+from reposcan.engines import yara_cli
+from reposcan.models import ScanError, ScannableFile, ScanStats
 
 
 def normalized_findings(payload: dict[str, object]) -> list[dict[str, object]]:
@@ -40,14 +30,13 @@ def normalized_findings(payload: dict[str, object]) -> list[dict[str, object]]:
 def test_yara_cli_validation_reports_diagnostic_decoding_failures(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    scanner = load_scanner_module()
     decoding_error = UnicodeDecodeError("utf-8", b"\xff", 0, 1, "invalid start byte")
 
     def fail_to_decode(*args: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
         raise decoding_error
 
-    monkeypatch.setattr(scanner, "run_yara_cli", fail_to_decode)
-    error = scanner.validate_yara_cli("yara", [RULES / "developer_task_malware.yar"], 10)
+    monkeypatch.setattr(yara_cli, "run_yara_cli", fail_to_decode)
+    error = yara_cli.validate_yara_cli("yara", [RULES / "developer_task_malware.yar"], 10)
 
     assert error is not None
     assert error.code == "rules-compile"
@@ -58,11 +47,10 @@ def test_yara_cli_timeout_error_is_deterministic_and_hides_temporary_path(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    scanner = load_scanner_module()
     target = tmp_path / "target.txt"
     target.write_text("ordinary inert text\n", encoding="utf-8")
     target_stat = target.stat()
-    candidate = scanner.ScannableFile(
+    candidate = ScannableFile(
         path=target,
         display_path=target.name,
         device=target_stat.st_dev,
@@ -74,16 +62,16 @@ def test_yara_cli_timeout_error_is_deterministic_and_hides_temporary_path(
         temporary_paths.append(command[-1])
         raise subprocess.TimeoutExpired(command, timeout)
 
-    monkeypatch.setattr(scanner, "run_yara_cli", time_out)
+    monkeypatch.setattr(yara_cli, "run_yara_cli", time_out)
     results = [
-        scanner.scan_with_yara_cli(
+        yara_cli.scan_with_yara_cli(
             "yara",
             [RULES / "developer_task_malware.yar"],
             [candidate],
             max_size=1024,
             max_total_bytes=1024,
             timeout=10,
-            stats=scanner.ScanStats(),
+            stats=ScanStats(),
         )
         for _ in range(2)
     ]
@@ -91,7 +79,7 @@ def test_yara_cli_timeout_error_is_deterministic_and_hides_temporary_path(
     assert temporary_paths[0] != temporary_paths[1]
     assert results[0].errors == results[1].errors
     assert results[0].errors == [
-        scanner.ScanError("file-scan", "YARA CLI timed out after 10 seconds", str(target))
+        ScanError("file-scan", "YARA CLI timed out after 10 seconds", str(target))
     ]
     assert all(path not in results[0].errors[0].message for path in temporary_paths)
 

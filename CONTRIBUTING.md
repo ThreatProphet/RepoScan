@@ -30,6 +30,22 @@ execution. External research does not need a ThreatProphet report number.
 
 For vulnerabilities in the scanner itself, follow [SECURITY.md](SECURITY.md).
 
+## Work on the code
+
+Start with the [architecture guide](docs/architecture.md) for module ownership,
+the scan lifecycle, and a change-to-test map. The service boundary is
+`scan(ScanOptions) -> ScanResult`; CLI parsing and output rendering are separate.
+Keep new operations in the module that owns their responsibility and test that
+boundary directly.
+
+When refactoring, preserve the established result and filesystem contracts.
+Move existing assertions with their owning modules, and retain the race,
+resource-budget, incomplete-scan, and adapter-parity coverage. Compare output
+against the original implementation using the same fixtures and engine
+versions. CLI entry points and the versioned JSON schema are compatibility
+surfaces; importing former internal helpers from `scanner.py` is not a stable
+extension mechanism.
+
 ## Propose a detection
 
 Describe the mechanism and input stage before choosing a predicate:
@@ -46,7 +62,8 @@ source URLs in metadata. Do not name an actor in a verdict merely because its
 reported tooling uses a similar mechanism.
 
 Canonical rules live in `src/reposcan/rules/`. Common static checks live in
-`src/reposcan/review.py`; Lite remains a separate explicit heuristic matcher.
+`src/reposcan/review.py`; Lite patterns live in `src/reposcan/engines/lite.py`
+and remain a separate explicit heuristic matcher.
 Preserve source labels and do not claim parity between different detector types.
 
 ## Fixtures and expectations
