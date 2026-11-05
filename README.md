@@ -59,6 +59,18 @@ The distribution is named `threatprophet-reposcan`; the command remains
 `reposcan`. The package has not been published to PyPI; use the release-checkout
 instructions above. The unrelated `reposcan` package on PyPI is not this project.
 
+## Watch a scan
+
+![RepoScan reviewing benign and inert Web3Market fixtures](docs/assets/reposcan-demo.gif)
+
+The demo scans public fixtures as file data. The Web3Market example produces
+three findings across two files and a `review-needed` result with exit code `1`.
+A scan with no findings is not a guarantee of safety.
+
+[Reproduce the recording](docs/demo.md) · [Recording source](docs/demo.tape) ·
+[Full text result](examples/web3market.txt) ·
+[Web3Market case study](docs/web3market.md)
+
 ## See an example finding
 
 Try the reduced Web3Market fixture included in this checkout:
