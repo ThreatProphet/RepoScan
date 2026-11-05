@@ -63,37 +63,43 @@ instructions above. The unrelated `reposcan` package on PyPI is not this project
 
 ![RepoScan reviewing benign and inert Web3Market fixtures](docs/assets/reposcan-demo.gif)
 
-The demo scans public fixtures as file data. The Web3Market example produces
+This demonstration shows the **updated terminal layout from the development
+checkout**, using captured CLI output. The demo scans public fixtures as file
+data. The Web3Market example produces
 three findings across two files and a `review-needed` result with exit code `1`.
 A scan with no findings is not a guarantee of safety.
 
+[MP4 video](docs/assets/reposcan-demo.mp4) ·
 [Reproduce the recording](docs/demo.md) · [Recording source](docs/demo.tape) ·
 [Full text result](examples/web3market.txt) ·
 [Web3Market case study](docs/web3market.md)
 
 ## See an example finding
 
-Try the reduced Web3Market fixture included in this checkout:
+Try the reduced Web3Market fixture with the updated renderer in this checkout,
+using your [development environment](CONTRIBUTING.md#verify-changes):
 
 ```bash
-reposcan tests/fixtures/web3market-entry --color never
+python tools/scan_task.py tests/fixtures/web3market-entry --color never --width 100
 ```
 
 Selected output from the real CLI, with other lines omitted:
 
 ```text
 Verdict:  review-needed
-Findings: 3
+Findings: 3 across 2 files
+Severity: [HIGH 1]  [MEDIUM 1]  [LOW 1]
 Scanned:  2/2 selected files
 
-HIGH
-  - TP_DevelTask_Node_InlineArray_Remote_Execution
-    path:   controllers/users.js.fixture
-    source: yara-python
-    review: report-pattern; confidence medium
-    why:    Web3Market-style inline-array import, character-decoded fetch, JSON token extraction, and call context coexist
-    match:  $import at line 3, byte 191 (23 bytes)
-    report: TP-2026-018
+[HIGH]  Finding 1/3
+  Location: controllers/users.js.fixture:3
+  Why:      Web3Market-style inline-array import, character-decoded fetch, JSON token extraction,
+            and call context coexist
+  Match:    line 3 | byte 191 | 23 bytes | $import
+  Review:   report-pattern | confidence: medium
+  Rule:     TP_DevelTask_Node_InlineArray_Remote_Execution
+  Source:   yara-python
+  Report:   TP-2026-018
 ```
 
 Exit `1` is expected because the fixture produces review findings. Its two
@@ -144,6 +150,16 @@ destinations are omitted from reports.
 **Severity** expresses potential impact or review urgency. **Confidence**
 expresses the strength of the matched evidence. Legitimate tooling can use
 risky mechanisms, so a warning calls for inspection of the surrounding code.
+
+The updated terminal view puts the location and reason first. Severity badges
+use magenta for critical, red for high, yellow for medium, and blue for low.
+Cyan highlights paths and evidence line numbers. Every color has an explicit
+text label, so plain output contains the same information.
+
+Text wraps to the terminal width, up to 120 columns. In the development
+checkout, `--width 80` selects a fixed width for smaller terminals or recordings.
+`--color never` disables styling; automatic color respects `NO_COLOR` and is
+disabled when redirected. JSON and Markdown are unaffected by these text options.
 
 | Exit | Result | Next step |
 | --- | --- | --- |

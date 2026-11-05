@@ -15,12 +15,13 @@ import stat
 import subprocess
 import sys
 import tempfile
+import unicodedata
 from contextlib import ExitStack
 from dataclasses import asdict, dataclass, field, replace
 from importlib.resources import files as package_files
 from pathlib import Path
 from time import monotonic
-from typing import Any, Iterable, Sequence
+from typing import Any, Callable, Iterable, Sequence
 
 from reposcan import __version__
 from reposcan.engine_support import (
@@ -67,6 +68,8 @@ class Colors:
         self.red = "\033[31m" if enabled else ""
         self.yellow = "\033[33m" if enabled else ""
         self.blue = "\033[34m" if enabled else ""
+        self.cyan = "\033[36m" if enabled else ""
+        self.magenta = "\033[35m" if enabled else ""
         self.green = "\033[32m" if enabled else ""
         self.gray = "\033[90m" if enabled else ""
 
@@ -928,10 +931,10 @@ def summarize(findings: list[Finding], engine: str) -> tuple[str, int]:
 
 def severity_color(severity: str, colors: Colors) -> str:
     return {
-        "critical": colors.red,
-        "high": colors.yellow,
-        "medium": colors.blue,
-        "low": colors.gray,
+        "critical": colors.magenta,
+        "high": colors.red,
+        "medium": colors.yellow,
+        "low": colors.blue,
     }.get(severity, colors.gray)
 
 
@@ -939,7 +942,7 @@ def verdict_color(verdict: str, colors: Colors) -> str:
     return {
         "high-risk": colors.red,
         "suspicious": colors.yellow,
-        "review-needed": colors.blue,
+        "review-needed": colors.yellow,
         "heuristic-findings": colors.yellow,
         "scan-incomplete": colors.red,
         "scan-failed": colors.red,
@@ -950,6 +953,47 @@ def verdict_color(verdict: str, colors: Colors) -> str:
 
 def safe_terminal_text(value: object) -> str:
     return "".join(character if character.isprintable() else ascii(character)[1:-1] for character in str(value))
+
+
+def terminal_columns(text: str) -> int:
+    """Measure printable text before styling, including wide and combining characters."""
+    return sum(
+        0 if unicodedata.category(character) in {"Mn", "Me"}
+        else 2 if unicodedata.east_asian_width(character) in {"W", "F"}
+        else 1
+        for character in text
+    )
+
+
+def wrap_terminal_text(text: str, width: int, *, preserve_spaces: bool = False) -> list[str]:
+    """Wrap escaped prose at words, or preserve every character in path fields."""
+    lines: list[str] = []
+    current = ""
+    pending_space = ""
+    for token in [text] if preserve_spaces else re.findall(r" +|[^ ]+", text):
+        if token.isspace() and not preserve_spaces:
+            pending_space += token
+            continue
+        separator = pending_space if current else ""
+        pending_space = ""
+        if terminal_columns(current + separator + token) <= width:
+            current += separator + token
+            continue
+        if current:
+            lines.append(current)
+            current = ""
+        used = 0
+        for character in token:
+            size = terminal_columns(character)
+            if current and used + size > width:
+                lines.append(current)
+                current = ""
+                used = 0
+            current += character
+            used += size
+    if current or not lines:
+        lines.append(current)
+    return lines
 
 
 def print_text(
@@ -963,67 +1007,125 @@ def print_text(
     status: str,
     stats: ScanStats,
     colors: Colors,
+    width: int | None = None,
 ) -> None:
-    verdict_text = colors.wrap(verdict, colors.bold + verdict_color(verdict, colors))
-    print(colors.wrap(f"RepoScan {__version__} | review before trusting, installing, or running", colors.bold))
-    print(f"Target:   {safe_terminal_text(target)}")
-    display_engine = "lite (heuristic-only; not YARA)" if engine == "lite" else engine
-    print(f"Engine:   {safe_terminal_text(display_engine)}")
-    print(f"Status:   {status}")
-    print(f"Complete: {'yes' if complete else 'no'}")
-    print(f"Verdict:  {verdict_text}")
-    print(f"Findings: {len(findings)}")
-    print(f"Scanned:  {stats.files_scanned}/{stats.files_selected} selected files")
-    print(f"Skipped:  {stats.ignored} ignored entries, {stats.skipped_oversize} oversized, "
-          f"{stats.skipped_symlinks} symlinks, {stats.skipped_special} special files")
-    print("Scope:    completeness applies to the selected policy; no findings is not a safety guarantee.")
-    if errors:
-        print()
-        print(colors.wrap("ERRORS", colors.bold + colors.red))
-        for error in errors:
-            location = f" ({safe_terminal_text(error.path)})" if error.path else ""
-            print(f"  - {safe_terminal_text(error.code)}: {safe_terminal_text(error.message)}{location}")
-    if not findings and complete:
-        print()
-        if engine == "lite":
-            print(colors.wrap("No heuristic patterns were found; this was not a YARA scan.", colors.green))
-        else:
-            print(colors.wrap("No matching review patterns were found in the inspected scope.", colors.green))
-        if stats.files_scanned == 0:
-            print("No file content was scanned. Review the selection and skip policy before proceeding.")
-        return
+    if width is None:
+        width = min(shutil.get_terminal_size(fallback=(100, 24)).columns, 120) if sys.stdout.isatty() else 100
+    width = max(20, width)
 
+    def line(value: object = "", style: str = "", highlight: Callable[[str], str] | None = None) -> None:
+        for part in wrap_terminal_text(safe_terminal_text(value), width):
+            print(highlight(part) if highlight else colors.wrap(part, style))
+
+    def field(
+        label: str, value: object, style: str = "", *, indent: int = 2,
+        highlight: Callable[[str], str] | None = None, preserve_spaces: bool = False,
+    ) -> None:
+        prefix = " " * indent + f"{label + ':':<10}"
+        parts = wrap_terminal_text(safe_terminal_text(value), width - len(prefix), preserve_spaces=preserve_spaces)
+        for index, part in enumerate(parts):
+            lead = colors.wrap(prefix, colors.bold) if index == 0 else " " * len(prefix)
+            rendered = highlight(part) if highlight else colors.wrap(part, style)
+            print(lead + rendered)
+
+    def priority(text: str) -> str:
+        return re.sub(
+            r"\[(CRITICAL|HIGH|MEDIUM|LOW)(?: \d+)?\]",
+            lambda match: colors.wrap(match.group(), colors.bold + severity_color(match[1].lower(), colors)),
+            text,
+        )
+
+    def match_location(text: str) -> str:
+        text = re.sub(
+            r"\bline \d+\b", lambda match: colors.wrap(match.group(), colors.bold + colors.cyan), text,
+        )
+        return re.sub(
+            r"\$[A-Za-z_][A-Za-z0-9_]*", lambda match: colors.wrap(match.group(), colors.magenta), text,
+        )
+
+    line(f"RepoScan {__version__}", colors.bold)
+    line("Review before trusting, installing, or running.")
+    line()
+    verdict_style = colors.yellow if complete and stats.files_scanned == 0 else verdict_color(verdict, colors)
+    field("Verdict", verdict, colors.bold + verdict_style, indent=0)
+    finding_files = len({finding.path for finding in findings})
+    file_label = "file" if finding_files == 1 else "files"
+    field("Findings", f"{len(findings)} across {finding_files} {file_label}", indent=0)
     if findings:
-        print()
-    current_severity = None
-    for finding in findings:
-        if finding.severity != current_severity:
-            current_severity = finding.severity
-            label = SEVERITY_LABEL.get(finding.severity, finding.severity.upper())
-            colored_label = colors.wrap(label, colors.bold + severity_color(finding.severity, colors))
-            print(f"{colored_label}")
-        rule = colors.wrap(safe_terminal_text(finding.rule), colors.bold)
-        path = colors.wrap(safe_terminal_text(finding.path), colors.blue)
-        source = colors.wrap(safe_terminal_text(finding.source), colors.gray)
-        print(f"  - {rule}")
-        print(f"    path:   {path}")
-        print(f"    source: {source}")
-        print(f"    review: {safe_terminal_text(finding.category)}; confidence {safe_terminal_text(finding.confidence)}")
+        counts = {severity: sum(f.severity == severity for f in findings) for severity in SEVERITY_LABEL}
+        levels = [f"[{SEVERITY_LABEL[severity]} {count}]" for severity, count in counts.items() if count]
+        other = len(findings) - sum(counts.values())
+        if other:
+            levels.append(f"[OTHER {other}]")
+        field("Severity", "  ".join(levels), indent=0, highlight=priority)
+    field("Scanned", f"{stats.files_scanned}/{stats.files_selected} selected files", indent=0)
+    field("Status", f"{status} | scope complete: {'yes' if complete else 'no'}",
+          "" if complete else colors.bold + colors.red, indent=0)
+    field("Target", target, colors.cyan, indent=0, preserve_spaces=True)
+    display_engine = "lite (heuristic-only; not YARA)" if engine == "lite" else engine
+    field("Engine", display_engine, indent=0)
+
+    if errors:
+        line()
+        line("SCAN ERRORS", colors.bold + colors.red)
+        for error in errors:
+            field("Error", f"{error.code}: {error.message}", colors.red)
+            if error.path:
+                field("Location", error.path, colors.cyan, preserve_spaces=True)
+
+    for index, finding in enumerate(findings, start=1):
+        line()
+        label = SEVERITY_LABEL.get(finding.severity, finding.severity.upper())
+        line(f"[{label}]  Finding {index}/{len(findings)}", highlight=priority)
+        first_line = min((evidence.line for evidence in finding.evidence), default=None)
+        location = f"{finding.path}:{first_line}" if first_line is not None else finding.path
+        field("Location", location, colors.bold + colors.cyan, preserve_spaces=True)
         if finding.description:
-            print(f"    why:    {safe_terminal_text(finding.description)}")
+            field("Why", finding.description)
         if finding.trigger:
-            print(f"    when:   {safe_terminal_text(finding.trigger)}")
+            field("Trigger", finding.trigger)
         for prerequisite in finding.prerequisites:
-            print(f"    note:   {safe_terminal_text(prerequisite)}")
+            field("Prereq", prerequisite)
         for evidence in finding.evidence[:4]:
-            print(f"    match:  {safe_terminal_text(evidence.identifier)} at line {evidence.line}, "
-                  f"byte {evidence.offset} ({evidence.length} bytes)")
-        if len(finding.evidence) > 4 or finding.evidence_truncated:
-            print("    note:   additional evidence locations are available in JSON/Markdown (subject to the cap).")
+            field("Match", f"line {evidence.line} | byte {evidence.offset} | "
+                  f"{evidence.length} bytes | {evidence.identifier}", highlight=match_location)
+        if len(finding.evidence) > 4:
+            remaining = len(finding.evidence) - 4
+            location_label = "location" if remaining == 1 else "locations"
+            field("More", f"{remaining} more recorded {location_label} in JSON/Markdown.")
+        if finding.evidence_truncated:
+            field("Limit", "Evidence collection was capped; further matches may be omitted.")
+        field("Review", f"{finding.category} | confidence: {finding.confidence}")
+        field("Rule", finding.rule)
+        field("Source", finding.source)
         if finding.reports:
-            print(f"    report: {safe_terminal_text(', '.join(finding.reports))}")
-    print()
-    print(colors.wrap(f"Exit code: {exit_code}", colors.dim))
+            field("Report", ", ".join(finding.reports), colors.blue)
+
+    if not findings and complete:
+        line()
+        if stats.files_scanned == 0:
+            line("No file content was scanned. Review the selection and skip policy before proceeding.",
+                 colors.bold + colors.yellow)
+        elif engine == "lite":
+            line("No heuristic patterns were found; this was not a YARA scan.", colors.green)
+        else:
+            line("No matching review patterns were found in the inspected scope.", colors.green)
+
+    line()
+    line("COVERAGE", colors.bold)
+    skipped = (f"{stats.ignored} ignored entries, {stats.skipped_oversize} oversized, "
+               f"{stats.skipped_symlinks} symlinks, {stats.skipped_special} special files")
+    if stats.skipped_resource_limit:
+        skipped += f", {stats.skipped_resource_limit} resource-limited"
+    field("Skipped", skipped)
+    field("Scope", "Completeness applies to the selected policy; no findings is not a safety guarantee.")
+    line()
+    if not complete:
+        field("Next", "Resolve the reported scan errors and rescan; this result is incomplete.",
+              colors.bold + colors.red, indent=0)
+    elif findings:
+        field("Next", "Review the flagged files and their execution context before running the project.", indent=0)
+    line(f"Exit code: {exit_code}", colors.bold)
 
 
 class RepoScanArgumentParser(argparse.ArgumentParser):
@@ -1039,6 +1141,13 @@ def positive_integer(value: str) -> int:
         raise argparse.ArgumentTypeError("must be an integer") from exc
     if number <= 0:
         raise argparse.ArgumentTypeError("must be greater than zero")
+    return number
+
+
+def text_width(value: str) -> int:
+    number = positive_integer(value)
+    if not 40 <= number <= 240:
+        raise argparse.ArgumentTypeError("must be between 40 and 240 columns")
     return number
 
 
@@ -1148,6 +1257,7 @@ def emit_result(
             status,
             stats,
             Colors(color_enabled(args.color)),
+            getattr(args, "width", None),
         )
     return exit_code
 
@@ -1187,6 +1297,10 @@ def run_scan(stack: ExitStack) -> int:
     parser.add_argument("--format", choices=("text", "json", "markdown"), default="text", help="Output format")
     parser.add_argument("--version", action="version", version=f"RepoScan {__version__}")
     parser.add_argument("--color", choices=("auto", "always", "never"), default="auto", help="Colorize text output")
+    parser.add_argument(
+        "--width", type=text_width,
+        help="Text width in columns (40-240); default: terminal width up to 120, or 100 when redirected",
+    )
     parser.add_argument("--max-size", type=positive_integer, default=DEFAULT_MAX_SIZE, help="Maximum bytes per file")
     parser.add_argument("--max-files", type=positive_integer, default=DEFAULT_MAX_FILES, help="Maximum selected files")
     parser.add_argument(

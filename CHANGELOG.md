@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Terminal findings now lead with severity and file location, followed by the
+  reason and highlighted evidence. A severity-count summary supports triage;
+  full rule IDs, confidence, trigger prerequisites, and evidence limits remain
+  visible.
+- Text wraps to the terminal width, up to 120 columns, or 100 columns when
+  redirected. `--width` selects a reproducible width from 40 to 240 columns.
+  Color remains optional, with the same labels and details in plain output.
+- Incomplete scans retain prominent errors and follow-up guidance. Empty
+  selections use a warning color, and every text result shows its exit code.
+  Detection behavior, JSON/Markdown output, and exit-code meanings are unchanged.
+- Refreshed the GIF/MP4 demonstration and recording guide for the updated
+  terminal layout, with complete report pages and verified scan exit statuses.
+
 ## 0.2.0 - 2026-11-05
 
 Version 0.2.0 centers the developer workflow of reviewing an unfamiliar
