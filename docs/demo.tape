@@ -1,4 +1,5 @@
 # Run from the trusted RepoScan checkout with the installed 0.2.0 CLI and YARA.
+# Setup, reruns, and troubleshooting: docs/demo.md (from the repository root).
 # Reuse the public fixtures copied into /tmp/reposcan-demo-v0.2.0.
 # Requires VHS, ttyd and ffmpeg. No target code is executed.
 # Titles are demo annotations; every report page is unmodified scanner output.

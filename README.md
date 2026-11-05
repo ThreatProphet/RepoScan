@@ -67,7 +67,7 @@ The demo scans public fixtures as file data. The Web3Market example produces
 three findings across two files and a `review-needed` result with exit code `1`.
 A scan with no findings is not a guarantee of safety.
 
-[Recording source](docs/demo.tape) ·
+[Reproduce the recording](docs/demo.md) · [Recording source](docs/demo.tape) ·
 [Full text result](examples/web3market.txt) ·
 [Web3Market case study](docs/web3market.md)
 
