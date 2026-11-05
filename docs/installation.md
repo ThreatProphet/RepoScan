@@ -1,6 +1,6 @@
 # Install and maintain RepoScan
 
-These instructions apply to **RepoScan 0.2.0**. Install from the trusted
+These instructions apply to **RepoScan 0.3.1**. Install from the trusted
 release checkout or source archive. The package has not been published to
 PyPI.
 
@@ -36,12 +36,12 @@ as the target argument to `reposcan`.
 With Git installed, clone the tagged version and enter its directory:
 
 ```bash
-git clone --branch v0.2.0 --depth 1 https://github.com/ThreatProphet/RepoScan.git
+git clone --branch v0.3.1 --depth 1 https://github.com/ThreatProphet/RepoScan.git
 cd RepoScan
 ```
 
 Alternatively, download the source archive from the
-[v0.2.0 release](https://github.com/ThreatProphet/RepoScan/releases/tag/v0.2.0),
+[v0.3.1 release](https://github.com/ThreatProphet/RepoScan/releases/tag/v0.3.1),
 extract it, and open a terminal in the extracted directory containing
 `pyproject.toml` and `install.sh`.
 

@@ -2,24 +2,60 @@
 
 ## Unreleased
 
+## 0.3.1 - 2026-11-05
+
+RepoScan 0.3.1 makes findings easier to interpret and the codebase easier to
+maintain and extend. It includes the terminal improvements and architecture
+refactor developed since 0.2.0.
+
+The earlier `v0.3.0` tag was created while the package still identified itself
+as 0.2.0. Release preparation stopped at version validation, and no release
+assets were published for that tag. Version 0.3.1 aligns the tag, package
+metadata, runtime version, and changelog while preserving the existing tag.
+
+### Added
+
+- `--width` selects a reproducible text width from 40 to 240 columns.
+- An architecture guide documents module responsibilities, the scan lifecycle,
+  contribution paths, and the security and correctness properties to preserve.
+- Focused service tests cover explicit arguments, structured failures,
+  API/CLI consistency, independent repeated scans, and engine-loading failures.
+- A maintainer release guide documents version preparation, local validation
+  before pushing a tag, verified draft assets, and publication.
+
 ### Changed
 
-- Separated CLI presentation from a typed scan service, with dedicated
-  filesystem, rule-pack, engine, terminal, and result modules. Documented module
-  ownership and contribution paths. Existing CLI behavior, output contracts,
-  detections, and the `scanner.main` compatibility entry point are preserved.
 - Terminal findings now lead with severity and file location, followed by the
   reason and highlighted evidence. A severity-count summary supports triage;
   full rule IDs, confidence, trigger prerequisites, and evidence limits remain
   visible.
 - Text wraps to the terminal width, up to 120 columns, or 100 columns when
-  redirected. `--width` selects a reproducible width from 40 to 240 columns.
-  Color remains optional, with the same labels and details in plain output.
+  redirected. Color remains optional, with the same labels and details in
+  plain output.
 - Incomplete scans retain prominent errors and follow-up guidance. Empty
   selections use a warning color, and every text result shows its exit code.
-  Detection behavior, JSON/Markdown output, and exit-code meanings are unchanged.
+- Separated CLI presentation from a typed `scan(ScanOptions) -> ScanResult`
+  service, with dedicated filesystem, rule-pack, engine, terminal, and result
+  modules. The scanner module is reduced from 1,642 to 223 lines.
 - Refreshed the GIF/MP4 demonstration and recording guide for the updated
-  terminal layout, with complete report pages and verified scan exit statuses.
+  terminal layout, using public inert fixtures. Existing media remains labeled
+  as a pre-release capture; reproduction commands now use 0.3.1.
+- Updated installation instructions, contributor examples, and example reports
+  for the release version.
+
+### Compatibility
+
+- Detection rules, common static-review checks, verdict rules, and exit-code
+  meanings are preserved. This release does not add detection coverage.
+- JSON schema 1.0 and the Markdown report contract are preserved. The reported
+  tool version changes to 0.3.1. Integrations should consume JSON rather than
+  parsing the redesigned terminal text layout.
+- Installed, module, and source-checkout command-line entry points remain
+  available, including the `scanner.main` compatibility delegate. Internal
+  helpers formerly imported from `scanner.py` now live in their owning modules;
+  the typed service is an internal development interface.
+- Linux remains the supported platform with Python 3.10 or later and a
+  compatible YARA installation for canonical scanning.
 
 ## 0.2.0 - 2026-11-05
 
