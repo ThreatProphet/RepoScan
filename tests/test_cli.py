@@ -9,10 +9,18 @@ from conftest import FIXTURES, assert_payload_shape, parse_json_output, run_scan
 
 @pytest.mark.canonical
 @pytest.mark.parametrize(
-    "fixture_name",
-    ["malicious-vscode", "malicious-githook", "suspicious-env", "suspicious-pipe", "sensitive-collector"],
+    ("fixture_name", "expected_rule"),
+    [
+        ("malicious-vscode", "TP_DevelTask_VSCode_FolderOpen_PipeToShell"),
+        ("malicious-githook", "TP_DevelTask_GitHook_Remote_Pipe"),
+        ("suspicious-env", "TP_DevelTask_ENV_Base64_URL_Hidden_Config"),
+        ("suspicious-pipe", "TP_DevelTask_Remote_Content_Piped_To_Shell"),
+        ("sensitive-collector", "TP_DevelTask_Sensitive_File_Collection_Patterns"),
+    ],
 )
-def test_existing_positive_fixtures_match_canonical_engine(canonical_engine: str, fixture_name: str) -> None:
+def test_existing_positive_fixtures_match_canonical_engine(
+    canonical_engine: str, fixture_name: str, expected_rule: str
+) -> None:
     result = run_scanner(FIXTURES / fixture_name, "--engine", canonical_engine)
     payload = parse_json_output(result)
 
@@ -22,7 +30,8 @@ def test_existing_positive_fixtures_match_canonical_engine(canonical_engine: str
     assert payload["status"] == "complete"
     assert payload["engine"] == canonical_engine
     assert payload["findings"]
-    assert all(finding["rule"].startswith("TP_DevelTask_") for finding in payload["findings"])
+    assert expected_rule in {finding["rule"] for finding in payload["findings"]}
+    assert all(finding["rule"].startswith(("TP_DevelTask_", "REVIEW_")) for finding in payload["findings"])
 
 
 @pytest.mark.canonical
@@ -60,11 +69,11 @@ def test_single_file_and_directory_scans_have_equivalent_findings(canonical_engi
     ("fixture_name", "expected_exit", "expected_verdict"),
     [
         ("benign", 0, "no-findings"),
-        ("suspicious-pipe", 1, "suspicious"),
-        ("malicious-vscode", 2, "malicious-likely"),
+        ("suspicious-pipe", 1, "review-needed"),
+        ("malicious-vscode", 2, "high-risk"),
     ],
 )
-def test_canonical_severity_controls_verdict_and_exit_code(
+def test_canonical_priority_and_confidence_control_verdict_and_exit_code(
     canonical_engine: str,
     fixture_name: str,
     expected_exit: int,
@@ -87,8 +96,9 @@ def test_lite_mode_is_explicitly_heuristic() -> None:
     assert payload["engine"] == "lite"
     assert payload["verdict"] == "heuristic-findings"
     assert payload["findings"]
-    assert all(finding["rule"].startswith("HEUR_") for finding in payload["findings"])
-    assert all(finding["source"] == "heuristic-lite" for finding in payload["findings"])
+    assert any(finding["rule"].startswith("HEUR_") for finding in payload["findings"])
+    assert all(finding["rule"].startswith(("HEUR_", "REVIEW_")) for finding in payload["findings"])
+    assert all(finding["source"] in {"heuristic-lite", "static-review"} for finding in payload["findings"])
     assert all(not finding["rule"].startswith("TP_DevelTask_") for finding in payload["findings"])
 
 

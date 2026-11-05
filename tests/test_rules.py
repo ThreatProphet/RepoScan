@@ -15,6 +15,7 @@ EXPECTED_RULE_IDS = {
     "TP_DevelTask_NPM_Lifecycle_Server_Execution",
     "TP_DevelTask_NPM_Lifecycle_Suspicious_Command",
     "TP_DevelTask_Node_Remote_Fetch_Dynamic_Execute",
+    "TP_DevelTask_Node_InlineArray_Remote_Execution",
     "TP_DevelTask_PowerShell_Hidden_Encoded",
     "TP_DevelTask_Remote_Content_Piped_To_Shell",
     "TP_DevelTask_Sensitive_File_Collection_Patterns",
@@ -24,14 +25,14 @@ EXPECTED_RULE_IDS = {
 
 
 def test_canonical_rule_identifiers_are_stable() -> None:
-    text = (RULES / "developer_task_malware.yar").read_text(encoding="utf-8")
+    text = "\n".join(path.read_text(encoding="utf-8") for path in sorted(RULES.glob("*.yar")))
     actual = set(re.findall(r"(?m)^rule\s+([A-Za-z0-9_]+)\s*$", text))
 
     assert actual == EXPECTED_RULE_IDS
 
 
 def test_every_canonical_rule_has_supported_severity() -> None:
-    text = (RULES / "developer_task_malware.yar").read_text(encoding="utf-8")
+    text = "\n".join(path.read_text(encoding="utf-8") for path in sorted(RULES.glob("*.yar")))
     rule_bodies = re.findall(r"(?ms)^rule\s+([A-Za-z0-9_]+)\s*\{(.*?)(?=^rule\s+|\Z)", text)
 
     assert {name for name, _ in rule_bodies} == EXPECTED_RULE_IDS

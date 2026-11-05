@@ -13,9 +13,10 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCANNER = REPO_ROOT / "tools" / "scan_task.py"
+SCANNER_MODULE_PATH = REPO_ROOT / "src" / "reposcan" / "scanner.py"
 WRAPPER = REPO_ROOT / "tools" / "scan_task.sh"
 FIXTURES = REPO_ROOT / "tests" / "fixtures"
-RULES = REPO_ROOT / "rules"
+RULES = REPO_ROOT / "src" / "reposcan" / "rules"
 
 
 def has_yara_python() -> bool:

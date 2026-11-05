@@ -58,7 +58,10 @@ def test_symlinks_and_fifo_are_policy_skips(tmp_path: Path) -> None:
 @pytest.mark.posix
 def test_socket_is_a_policy_skip(tmp_path: Path) -> None:
     socket_path = tmp_path / "unix-socket"
-    unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    try:
+        unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    except PermissionError:
+        pytest.skip("AF_UNIX socket creation is prohibited by this execution environment")
     try:
         try:
             unix_socket.bind(str(socket_path))

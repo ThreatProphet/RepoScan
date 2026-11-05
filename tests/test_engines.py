@@ -11,7 +11,7 @@ import pytest
 from conftest import (
     FIXTURES,
     RULES,
-    SCANNER,
+    SCANNER_MODULE_PATH,
     has_yara_cli,
     has_yara_python,
     parse_json_output,
@@ -20,7 +20,7 @@ from conftest import (
 
 
 def load_scanner_module() -> ModuleType:
-    spec = importlib.util.spec_from_file_location("reposcan_scanner_engine_tests", SCANNER)
+    spec = importlib.util.spec_from_file_location("reposcan_scanner_engine_tests", SCANNER_MODULE_PATH)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -28,12 +28,12 @@ def load_scanner_module() -> ModuleType:
     return module
 
 
-def normalized_findings(payload: dict[str, object]) -> list[tuple[str, str, str, str]]:
+def normalized_findings(payload: dict[str, object]) -> list[dict[str, object]]:
     findings = payload["findings"]
     assert isinstance(findings, list)
     return sorted(
-        (finding["rule"], finding["severity"], finding["path"], finding["description"])
-        for finding in findings
+        ({key: value for key, value in finding.items() if key != "source"} for finding in findings),
+        key=lambda finding: (finding["path"], finding["rule"]),
     )
 
 
@@ -107,6 +107,7 @@ def test_yara_cli_timeout_error_is_deterministic_and_hides_temporary_path(
         "sensitive-collector",
         "benign",
         "benign-assets",
+        "web3market-entry",
     ],
 )
 def test_yara_cli_and_python_have_canonical_parity(fixture_name: str) -> None:
@@ -188,7 +189,7 @@ def test_rules_compile_with_yara_cli() -> None:
         pytest.skip("YARA CLI is not installed")
 
     result = subprocess.run(
-        [yara, "-w", str(RULES / "developer_task_malware.yar"), "/dev/null"],
+        [yara, "-w", *(str(path) for path in sorted(RULES.glob("*.yar"))), "/dev/null"],
         text=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

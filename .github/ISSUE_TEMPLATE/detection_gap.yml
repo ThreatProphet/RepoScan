@@ -1,0 +1,38 @@
+name: Detection gap or new technique
+description: Suggest a warning based on a public report or a suspicious repository pattern.
+title: "[Detection]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Contributions can start with a mechanism description. Public investigations from any publisher are welcome; you do not need to write a rule or supply a specimen.
+
+        Keep examples inert and omit credentials, personal data, private source, and live payloads. For vulnerabilities in RepoScan itself, follow [SECURITY.md](https://github.com/ThreatProphet/RepoScan/blob/HEAD/SECURITY.md).
+  - type: textarea
+    id: mechanism
+    attributes:
+      label: What should RepoScan warn about?
+      description: Describe the suspicious code or configuration visible before execution, and the developer action that might activate it.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Public source or sanitized example
+      description: Optional report link or reduced inert example. Identify whether an example is original, decoded, reconstructed, or synthetic; a readable derivative is not the original delivered input.
+    validations:
+      required: false
+  - type: textarea
+    id: scan_context
+    attributes:
+      label: Scan result, if available
+      description: Include the version, engine, command, exact rule IDs, exit code, and relevant coverage skips. Leave this blank if you have not scanned an example.
+    validations:
+      required: false
+  - type: textarea
+    id: comparisons
+    attributes:
+      label: Benign comparisons or known limits
+      description: Optional examples of legitimate code that looks similar, variants worth testing, or relationships the detector would leave unresolved.
+    validations:
+      required: false

@@ -1,0 +1,40 @@
+RepoScan 0.2.0 | review before trusting, installing, or running
+Target:   /tmp/reposcan-example-9gg5vk8z/web3market-entry
+Engine:   yara-python
+Status:   complete
+Complete: yes
+Verdict:  review-needed
+Findings: 3
+Scanned:  2/2 selected files
+Skipped:  0 ignored entries, 0 oversized, 0 symlinks, 0 special files
+Scope:    completeness applies to the selected policy; no findings is not a safety guarantee.
+
+HIGH
+  - TP_DevelTask_Node_InlineArray_Remote_Execution
+    path:   controllers/users.js.fixture
+    source: yara-python
+    review: report-pattern; confidence medium
+    why:    Web3Market-style inline-array import, character-decoded fetch, JSON token extraction, and call context coexist
+    match:  $import at line 3, byte 191 (23 bytes)
+    match:  $token_extract at line 7, byte 300 (11 bytes)
+    match:  $decoded_fetch at line 7, byte 325 (26 bytes)
+    match:  $json at line 7, byte 365 (7 bytes)
+    note:   additional evidence locations are available in JSON/Markdown (subject to the cap).
+    report: TP-2026-018
+MEDIUM
+  - REVIEW_Encoded_Character_Array
+    path:   models/User.js.fixture
+    source: static-review
+    review: obfuscation; confidence high
+    why:    A literal character-code array statically decodes to a URL; its use and destination require review.
+    match:  numeric-url-array at line 3, byte 166 (119 bytes)
+    report: TP-2026-018
+LOW
+  - REVIEW_Character_Code_Decoder
+    path:   controllers/users.js.fixture
+    source: static-review
+    review: obfuscation; confidence medium
+    why:    Character-code construction can conceal strings or perform ordinary text handling.
+    match:  character-decoder at line 7, byte 331 (20 bytes)
+
+Exit code: 1

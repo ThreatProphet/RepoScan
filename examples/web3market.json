@@ -1,0 +1,159 @@
+{
+  "complete": true,
+  "coverage": {
+    "scope": "Configured eligible files only; ignored entries may include pruned directories.",
+    "skipped": [],
+    "skipped_truncated": false
+  },
+  "engine": "yara-python",
+  "engine_version": "4.5.4",
+  "errors": [],
+  "findings": [
+    {
+      "category": "report-pattern",
+      "confidence": "medium",
+      "description": "Web3Market-style inline-array import, character-decoded fetch, JSON token extraction, and call context coexist",
+      "evidence": [
+        {
+          "identifier": "$import",
+          "length": 23,
+          "line": 3,
+          "offset": 191
+        },
+        {
+          "identifier": "$token_extract",
+          "length": 11,
+          "line": 7,
+          "offset": 300
+        },
+        {
+          "identifier": "$decoded_fetch",
+          "length": 26,
+          "line": 7,
+          "offset": 325
+        },
+        {
+          "identifier": "$json",
+          "length": 7,
+          "line": 7,
+          "offset": 365
+        },
+        {
+          "identifier": "$token_call",
+          "length": 25,
+          "line": 8,
+          "offset": 394
+        }
+      ],
+      "evidence_truncated": false,
+      "finding_id": "bd1d97978b018227c1ff1e05304bd1d5b56fb0cc97294892307415228beb231d",
+      "path": "controllers/users.js.fixture",
+      "prerequisites": [],
+      "references": [
+        "https://threatprophet.com/posts/web3market-polygon-wallet-cache/"
+      ],
+      "reports": [
+        "TP-2026-018"
+      ],
+      "rule": "TP_DevelTask_Node_InlineArray_Remote_Execution",
+      "severity": "high",
+      "sha256": "3c518161baa8bec93a06b64f576f0d562956f970eef8bfe5bb1f0fbec0ad2838",
+      "source": "yara-python",
+      "trigger": ""
+    },
+    {
+      "category": "obfuscation",
+      "confidence": "high",
+      "description": "A literal character-code array statically decodes to a URL; its use and destination require review.",
+      "evidence": [
+        {
+          "identifier": "numeric-url-array",
+          "length": 119,
+          "line": 3,
+          "offset": 166
+        }
+      ],
+      "evidence_truncated": false,
+      "finding_id": "2eacd08d95518a0ece2734c2fc08209527bccea8cc9420a28893e1058385e4ee",
+      "path": "models/User.js.fixture",
+      "prerequisites": [],
+      "references": [
+        "https://threatprophet.com/posts/web3market-polygon-wallet-cache/"
+      ],
+      "reports": [
+        "TP-2026-018"
+      ],
+      "rule": "REVIEW_Encoded_Character_Array",
+      "severity": "medium",
+      "sha256": "fa1a6c1f0daf1adca89f98e8d63ec8145a3396db7133fb6397367b5ebde04570",
+      "source": "static-review",
+      "trigger": ""
+    },
+    {
+      "category": "obfuscation",
+      "confidence": "medium",
+      "description": "Character-code construction can conceal strings or perform ordinary text handling.",
+      "evidence": [
+        {
+          "identifier": "character-decoder",
+          "length": 20,
+          "line": 7,
+          "offset": 331
+        }
+      ],
+      "evidence_truncated": false,
+      "finding_id": "36f34b35cd265aa59a360850d6f310449ebb34addbcfade775a7c1c188edc633",
+      "path": "controllers/users.js.fixture",
+      "prerequisites": [],
+      "references": [],
+      "reports": [],
+      "rule": "REVIEW_Character_Code_Decoder",
+      "severity": "low",
+      "sha256": "3c518161baa8bec93a06b64f576f0d562956f970eef8bfe5bb1f0fbec0ad2838",
+      "source": "static-review",
+      "trigger": ""
+    }
+  ],
+  "policy": {
+    "ignore_config_sha256": "9bc2647df302b1ff3741ee23a9e2117c7a75af2fc5e61a1b6cbc8f0774a58332",
+    "max_entries": 100000,
+    "max_files": 10000,
+    "max_size": 2097152,
+    "max_total_bytes": 268435456,
+    "timeout": 30
+  },
+  "rule_pack": {
+    "files": [
+      {
+        "name": "developer_task_malware.yar",
+        "sha256": "96840a958e187d1ec0268b330ffea1af7af29831ce931cb27f381dee892b0fb7"
+      },
+      {
+        "name": "web3market.yar",
+        "sha256": "59015e806fe8d68062d41c37fb9904ba7a7bf190957a2a79eabcb9e5c8e59584"
+      }
+    ],
+    "sha256": "fa6ddc2b9168bab96e39f5acfe2226cc1ffe8ad4215a2d64e0137ea604461f3e"
+  },
+  "schema_version": "1.0",
+  "stats": {
+    "directories_visited": 3,
+    "entries_seen": 4,
+    "files_scanned": 2,
+    "files_selected": 2,
+    "ignored": 0,
+    "regular_files": 2,
+    "selected_bytes": 737,
+    "skipped_oversize": 0,
+    "skipped_resource_limit": 0,
+    "skipped_special": 0,
+    "skipped_symlinks": 0
+  },
+  "status": "complete",
+  "target": "/tmp/reposcan-example-9gg5vk8z/web3market-entry",
+  "tool": {
+    "name": "RepoScan",
+    "version": "0.2.0"
+  },
+  "verdict": "review-needed"
+}

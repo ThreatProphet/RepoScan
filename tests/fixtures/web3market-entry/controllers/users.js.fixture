@@ -1,0 +1,12 @@
+// Inert source-text fixture. Never execute or install anything from this directory.
+// This snippet retains the observed lexical combination, not a runnable application.
+const arrayInline = require('inline-array');
+const userlist = require('../models/User');
+
+async function inspectOnly() {
+  const { token } = await (await fetch(String.fromCharCode(...userlist))).json();
+  return arrayInline(
+    token,
+    true
+  );
+}

@@ -1,12 +1,14 @@
 [build-system]
-requires = ["setuptools>=69"]
+requires = ["setuptools>=77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "reposcan"
-version = "0.1.0"
-description = "Deterministic YARA-based triage for untrusted developer-task repositories"
+name = "threatprophet-reposcan"
+version = "0.2.0"
+description = "Static review of unfamiliar repositories before trusting, installing, or running them"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
 dependencies = []
 
@@ -14,17 +16,37 @@ dependencies = []
 dev = [
   "pytest>=8,<9",
   "ruff>=0.8,<1",
+  "jsonschema>=4.23,<5",
+  "build>=1.2,<2",
+  "pipx>=1.7,<2",
 ]
 yara = [
   "yara-python>=4.5,<5",
 ]
 
+[project.scripts]
+reposcan = "reposcan.scanner:main"
+
+[project.urls]
+Repository = "https://github.com/ThreatProphet/RepoScan"
+Research = "https://threatprophet.com/"
+Issues = "https://github.com/ThreatProphet/RepoScan/issues"
+
 [tool.setuptools]
-packages = []
+include-package-data = false
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["reposcan*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+reposcan = ["rules/*.yar", "config/*.txt", "schemas/*.json"]
 
 [tool.pytest.ini_options]
 addopts = "-ra --strict-config --strict-markers"
 testpaths = ["tests"]
+pythonpath = ["src"]
 markers = [
   "canonical: requires at least one canonical YARA engine",
   "parity: requires both yara-python and the YARA CLI",
