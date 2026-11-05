@@ -54,9 +54,9 @@ contents strictly as scanner input.
 From a trusted RepoScan checkout with the canonical engine installed:
 
 ```bash
-.venv/bin/reposcan tests/fixtures/web3market-entry --engine yara-python --format text
-.venv/bin/reposcan tests/fixtures/web3market-entry --engine yara-python --format json
-.venv/bin/reposcan tests/fixtures/web3market-entry --engine yara-python --format markdown
+reposcan tests/fixtures/web3market-entry --engine yara-python --format text
+reposcan tests/fixtures/web3market-entry --engine yara-python --format json
+reposcan tests/fixtures/web3market-entry --engine yara-python --format markdown
 ```
 
 A `review-needed` result with exit code `1` is expected from the canonical

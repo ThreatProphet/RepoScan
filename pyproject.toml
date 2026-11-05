@@ -1,12 +1,14 @@
 [build-system]
-requires = ["setuptools>=69"]
+requires = ["setuptools>=77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "reposcan"
+name = "threatprophet-reposcan"
 version = "0.2.0"
 description = "Static review of unfamiliar repositories before trusting, installing, or running them"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
 dependencies = []
 
@@ -16,6 +18,7 @@ dev = [
   "ruff>=0.8,<1",
   "jsonschema>=4.23,<5",
   "build>=1.2,<2",
+  "pipx>=1.7,<2",
 ]
 yara = [
   "yara-python>=4.5,<5",

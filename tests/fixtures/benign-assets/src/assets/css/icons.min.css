@@ -1,0 +1,8 @@
+/* Original synthetic icon catalogue for benign regression checks. MIT licensed. */
+@font-face{font-family:"RepoScan Test Icons";src:url("../fonts/test-icons.woff2") format("woff2")}
+.demo-icon{font-family:"RepoScan Test Icons";font-weight:400}
+.icon-wallet:before{content:"\e001"}
+.icon-key:before{content:"\e002"}
+.icon-upload:before{content:"\e003"}
+.icon-seedling:before{content:"\e004"}
+.icon-environment:before{content:"\e005"}

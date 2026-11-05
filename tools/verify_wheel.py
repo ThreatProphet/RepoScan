@@ -59,7 +59,7 @@ for name in names:
 print(json.dumps({
     'origin': str(origin),
     'version': reposcan.__version__,
-    'distribution_version': importlib.metadata.version('reposcan'),
+    'distribution_version': importlib.metadata.version('threatprophet-reposcan'),
     'resources': names,
 }))
 """
@@ -136,20 +136,28 @@ def wheel_version(wheel: Path) -> str:
             names = [name for name in archive.namelist() if name.endswith(".dist-info/METADATA")]
             require(len(names) == 1, "wheel must contain exactly one distribution METADATA file")
             metadata = BytesParser().parsebytes(archive.read(names[0]))
+            require(metadata.get("License-Expression") == "MIT", "wheel must declare the MIT license")
+            require(metadata.get_all("License-File") == ["LICENSE"], "wheel must declare its LICENSE file")
+            license_path = names[0].removesuffix("METADATA") + "licenses/LICENSE"
+            expected_license = (Path(__file__).resolve().parents[1] / "LICENSE").read_bytes()
+            require(archive.read(license_path) == expected_license, "wheel license differs from the source license")
     except (OSError, zipfile.BadZipFile, KeyError) as error:
         raise VerificationError(f"cannot read wheel metadata: {error}") from error
     name = str(metadata.get("Name", ""))
-    require(re.sub(r"[-_.]+", "-", name).lower() == "reposcan", "wheel distribution is not RepoScan")
+    require(
+        re.sub(r"[-_.]+", "-", name).lower() == "threatprophet-reposcan",
+        "wheel distribution is not threatprophet-reposcan",
+    )
     version = str(metadata.get("Version", "")).strip()
     require(bool(version), "wheel has no distribution version")
     return version
 
 
-def assert_complete(payload: dict[str, Any], verdict: str, version: str) -> None:
+def assert_complete(payload: dict[str, Any], verdict: str, version: str, engine: str = "lite") -> None:
     require(payload.get("complete") is True, "scan was not complete")
     require(payload.get("status") == "complete", "unexpected scan status")
     require(payload.get("verdict") == verdict, f"unexpected verdict: {payload.get('verdict')!r}")
-    require(payload.get("engine") == "lite", "scan did not use the explicitly selected Lite engine")
+    require(payload.get("engine") == engine, f"scan did not use the expected {engine} engine")
     require(payload.get("errors") == [], "complete scan contains errors")
     tool = payload.get("tool")
     require(isinstance(tool, dict), "scan has no tool metadata object")

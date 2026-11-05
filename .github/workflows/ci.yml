@@ -10,7 +10,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -32,7 +32,7 @@ jobs:
           ruff check src tools tests
           python -m compileall -q src tools
       - name: Bash lint
-        run: shellcheck tools/scan_task.sh
+        run: shellcheck tools/scan_task.sh install.sh
       - name: Compile YARA rules
         run: yara -w src/reposcan/rules/*.yar /dev/null
       - name: Test
@@ -40,4 +40,14 @@ jobs:
       - name: Build distributions
         run: python -m build
       - name: Verify installed wheel outside checkout
-        run: python tools/verify_wheel.py dist/reposcan-0.2.0-py3-none-any.whl
+        run: python tools/verify_wheel.py dist/threatprophet_reposcan-0.2.0-py3-none-any.whl
+      - name: Verify fresh pipx installation and native scans
+        run: python tools/verify_install.py dist/threatprophet_reposcan-0.2.0-py3-none-any.whl
+      - name: Verify convenience installer outside checkout
+        run: |
+          install_test_dir=$(mktemp -d)
+          trap 'rm -rf "$install_test_dir"' EXIT
+          install_test_python=$(command -v python)
+          PATH=/usr/bin:/bin ./install.sh --python "$install_test_python" \
+            --prefix "$install_test_dir/application" --bin-dir "$install_test_dir/bin"
+          "$install_test_dir/bin/reposcan" --version

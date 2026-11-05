@@ -3,8 +3,8 @@
 ## 0.2.0 candidate, unreleased
 
 This candidate centers the developer workflow of reviewing an unfamiliar
-repository before trusting, installing, or running it. License selection
-remains a release blocker.
+repository before trusting, installing, or running it. It remains unreleased;
+installation instructions apply to a trusted checkout containing these changes.
 
 ### Added
 
@@ -18,6 +18,12 @@ remains a release blocker.
   packaged rule/configuration resources.
 - An installed `reposcan` command and `--version`.
 - Inert detection cases and documentation of the pre-execution review boundary.
+- MIT licensing for project-owned code, original rules, tests, and documentation.
+- A pipx quick start with YARA support and a manual virtual-environment fallback.
+- A Linux `install.sh` convenience installer that verifies the installed scanner
+  before exposing its command and reports existing-installation conflicts.
+- Installation and maintenance guidance, including migration from earlier
+  previews and removal instructions.
 
 ### Changed
 
@@ -31,6 +37,9 @@ remains a release blocker.
   or successful execution.
 - Source-checkout rules and defaults now live under `src/reposcan/`; legacy
   Python and Bash scan entry points continue to delegate to the implementation.
+- The Python distribution name is `threatprophet-reposcan`. The `reposcan`
+  command and Python import remain unchanged. Use a fresh environment when
+  migrating from a preview installed under the old distribution name.
 
 ### Reliability
 
@@ -44,6 +53,9 @@ remains a release blocker.
   performance warnings remain permissible.
 - Installed-distribution and evidence/output verification, retaining the
   existing safe-file and race-condition regression cases.
+- Fresh pipx installation checks with native YARA, benign and inert positive
+  scans, and removal, alongside the dependency-free wheel check.
+- Installer conflict and failure handling tests.
 
 ## 0.1.0 development baseline
 

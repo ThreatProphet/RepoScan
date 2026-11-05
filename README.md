@@ -2,9 +2,10 @@
 
 **Check the coding assignment before you run it.**
 
-[![CI](https://github.com/ThreatProphet/RepoScan/actions/workflows/ci.yml/badge.svg?branch=feat%2Fpreexecution-review)](https://github.com/ThreatProphet/RepoScan/actions/workflows/ci.yml?query=branch%3Afeat%2Fpreexecution-review)
+[![Preexecution branch CI](https://github.com/ThreatProphet/RepoScan/actions/workflows/ci.yml/badge.svg?branch=feat%2Fpreexecution-review)](https://github.com/ThreatProphet/RepoScan/actions/workflows/ci.yml?query=branch%3Afeat%2Fpreexecution-review)
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB)
 ![Linux](https://img.shields.io/badge/platform-Linux-444444)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 Received a take-home assignment, interview project, or unfamiliar repository?
 RepoScan checks its local files for suspicious execution triggers, concealed
@@ -21,34 +22,48 @@ execution chain is unresolved. Scanning reads the supplied files as data.
 
 ## Quick start
 
-**Current preview: 0.2.0 candidate, Linux, Python 3.10 or later.** The preview
-is on `feat/preexecution-review`; the commands below select that branch.
-Install the trusted scanner in its own environment, separate from the project
-you want to inspect.
+**Unreleased 0.2.0 candidate, Linux, Python 3.10 or later.** These instructions
+apply to a trusted RepoScan checkout containing this candidate's changes.
+A package-index release has not been published.
+
+With [pipx](https://pipx.pypa.io/latest/how-to/install-pipx.html) installed and its
+application directory on your `PATH`, run from the trusted scanner checkout:
 
 ```bash
-git clone --branch feat/preexecution-review --single-branch https://github.com/ThreatProphet/RepoScan.git
-cd RepoScan
-python3 -m venv .venv
-.venv/bin/python -m pip install '.[yara]'
-
-.venv/bin/reposcan /absolute/path/to/received-project
+pipx install '.[yara]'
+reposcan --version
+reposcan /absolute/path/to/received-project
 ```
+
+Pipx keeps the scanner in its own environment. The `[yara]` extra installs the
+engine used by the default scan. For setup without pipx, the same checkout
+includes an installer:
+
+```bash
+bash ./install.sh
+```
+
+It creates a dedicated environment, verifies a benign scan with YARA, and
+prints the command path and removal instructions. See the
+[installation guide](docs/installation.md) for prerequisites, custom paths,
+the manual virtual-environment option, upgrades, and existing-installation
+conflicts.
 
 The scan does not install the target's dependencies, invoke its hooks or setup
 commands, evaluate decoded source, or retrieve payload URLs. It requires no
 account, source upload, or LLM API key. Installing RepoScan and its dependencies
 is a separate step that can use the network.
 
-Use this repository's installation instructions. The unrelated `reposcan`
-package on PyPI is not this project.
+The distribution is named `threatprophet-reposcan`; the command remains
+`reposcan`. Use the local-checkout instructions above until a release is
+published. The unrelated `reposcan` package on PyPI is not this project.
 
 ## See an example finding
 
 Try the reduced Web3Market fixture included in this checkout:
 
 ```bash
-.venv/bin/reposcan tests/fixtures/web3market-entry --color never
+reposcan tests/fixtures/web3market-entry --color never
 ```
 
 Selected output from the real CLI, with other lines omitted:
@@ -138,17 +153,17 @@ trigger prerequisites, platform support, and result schema.
 Write reports outside the scanned target directory:
 
 ```bash
-.venv/bin/reposcan /absolute/path/to/received-project --format markdown > review.md
-.venv/bin/reposcan /absolute/path/to/received-project --format json > review.json
+reposcan /absolute/path/to/received-project --format markdown > review.md
+reposcan /absolute/path/to/received-project --format json > review.json
 ```
 
 The default engine selects `yara-python`, then the YARA CLI. If neither is
 available it fails explicitly. To select an engine:
 
 ```bash
-.venv/bin/reposcan /absolute/path/to/received-project --engine yara-python
-.venv/bin/reposcan /absolute/path/to/received-project --engine yara-cli
-.venv/bin/reposcan /absolute/path/to/received-project --engine lite
+reposcan /absolute/path/to/received-project --engine yara-python
+reposcan /absolute/path/to/received-project --engine yara-cli
+reposcan /absolute/path/to/received-project --engine lite
 ```
 
 Lite is an explicit heuristic mode with its own findings. Shared `REVIEW_*`
@@ -186,10 +201,15 @@ Windows is unsupported and macOS needs native verification. General data-flow
 analysis, remote repository acquisition, and broader platform support are not
 current features.
 
-The project owner has not yet selected a license. Reuse, contribution terms,
-and a public packaged release need that decision; this preview does not claim
-an open-source license.
+Project-owned code, original rules, tests, and documentation are licensed under
+[MIT](LICENSE). Dependencies and any third-party material retain their own
+licenses and notices. Linked investigations remain subject to their
+publishers' terms.
 
+The CI badge tracks the public `feat/preexecution-review` branch. This
+prepared candidate includes additional packaging and installation changes.
+
+- [Installation and maintenance](docs/installation.md)
 - [Detection guide](docs/detections.md)
 - [Design and trust boundary](docs/design.md)
 - [Web3Market case study](docs/web3market.md)
