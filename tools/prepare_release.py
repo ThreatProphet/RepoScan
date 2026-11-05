@@ -13,8 +13,9 @@ import datetime
 import re
 import subprocess
 import sys
-import tomllib
 from pathlib import Path
+
+import tomllib
 
 
 def require(condition: bool, message: str) -> None:
