@@ -1,4 +1,4 @@
-RepoScan 0.2.0
+RepoScan 0.3.1
 Review before trusting, installing, or running.
 
 Verdict:  review-needed
@@ -6,7 +6,7 @@ Findings: 3 across 2 files
 Severity: [HIGH 1]  [MEDIUM 1]  [LOW 1]
 Scanned:  2/2 selected files
 Status:   complete | scope complete: yes
-Target:   /tmp/reposcan-example-9gg5vk8z/web3market-entry
+Target:   /tmp/reposcan-example-blfcdi61/web3market-entry
 Engine:   yara-python
 
 [HIGH]  Finding 1/3

@@ -22,14 +22,14 @@ execution chain is unresolved. Scanning reads the supplied files as data.
 
 ## Quick start
 
-**Version 0.2.0, Linux, Python 3.10 or later.** Install the trusted scanner
+**Version 0.3.1, Linux, Python 3.10 or later.** Install the trusted scanner
 from the tagged release checkout.
 
 With Git and [pipx](https://pipx.pypa.io/latest/how-to/install-pipx.html) installed,
 and pipx's application directory on your `PATH`:
 
 ```bash
-git clone --branch v0.2.0 --depth 1 https://github.com/ThreatProphet/RepoScan.git
+git clone --branch v0.3.1 --depth 1 https://github.com/ThreatProphet/RepoScan.git
 cd RepoScan
 pipx install '.[yara]'
 reposcan --version
@@ -63,9 +63,9 @@ instructions above. The unrelated `reposcan` package on PyPI is not this project
 
 ![RepoScan reviewing benign and inert Web3Market fixtures](docs/assets/reposcan-demo.gif)
 
-This demonstration shows the **updated terminal layout from the development
-checkout**, using captured CLI output. The demo scans public fixtures as file
-data. The Web3Market example produces
+This **pre-release demonstration** replays captured CLI output of the terminal
+layout included in 0.3.1. Its original development-version label is retained.
+The demo scans public fixtures as file data. The Web3Market example produces
 three findings across two files and a `review-needed` result with exit code `1`.
 A scan with no findings is not a guarantee of safety.
 
@@ -76,11 +76,11 @@ A scan with no findings is not a guarantee of safety.
 
 ## See an example finding
 
-Try the reduced Web3Market fixture with the updated renderer in this checkout,
-using your [development environment](CONTRIBUTING.md#verify-changes):
+From the trusted release checkout used for installation, scan the reduced
+Web3Market fixture with the installed scanner:
 
 ```bash
-python tools/scan_task.py tests/fixtures/web3market-entry --color never --width 100
+reposcan tests/fixtures/web3market-entry --engine yara-python --color never --width 100
 ```
 
 Selected output from the real CLI, with other lines omitted:
@@ -151,13 +151,13 @@ destinations are omitted from reports.
 expresses the strength of the matched evidence. Legitimate tooling can use
 risky mechanisms, so a warning calls for inspection of the surrounding code.
 
-The updated terminal view puts the location and reason first. Severity badges
+The terminal view puts the location and reason first. Severity badges
 use magenta for critical, red for high, yellow for medium, and blue for low.
 Cyan highlights paths and evidence line numbers. Every color has an explicit
 text label, so plain output contains the same information.
 
-Text wraps to the terminal width, up to 120 columns. In the development
-checkout, `--width 80` selects a fixed width for smaller terminals or recordings.
+Text wraps to the terminal width, up to 120 columns, or to 100 columns when
+redirected. `--width 80` selects a fixed width for smaller terminals or recordings.
 `--color never` disables styling; automatic color respects `NO_COLOR` and is
 disabled when redirected. JSON and Markdown are unaffected by these text options.
 
@@ -228,7 +228,7 @@ credentials, or personal data to a public issue.
 
 ## Project status and documentation
 
-Version 0.2.0 supports Linux. Native Windows is unsupported and macOS needs
+Version 0.3.1 supports Linux. Native Windows is unsupported and macOS needs
 native verification. General data-flow analysis, remote repository acquisition,
 and broader platform support are not current features.
 
@@ -243,5 +243,6 @@ publishers' terms.
 - [Code architecture](docs/architecture.md)
 - [Web3Market case study](docs/web3market.md)
 - [Contribution guide](CONTRIBUTING.md)
+- [Maintainer release guide](docs/releases.md)
 - [Security reporting](SECURITY.md)
 - [Changelog](CHANGELOG.md)

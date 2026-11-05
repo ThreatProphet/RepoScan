@@ -106,8 +106,8 @@ python3 -m venv .venv
 shellcheck install.sh tools/scan_task.sh
 yara -w src/reposcan/rules/*.yar /dev/null
 .venv/bin/python -m build
-.venv/bin/python tools/verify_wheel.py dist/threatprophet_reposcan-0.2.0-py3-none-any.whl
-.venv/bin/python tools/verify_install.py dist/threatprophet_reposcan-0.2.0-py3-none-any.whl
+.venv/bin/python tools/verify_wheel.py dist/threatprophet_reposcan-0.3.1-py3-none-any.whl
+.venv/bin/python tools/verify_install.py dist/threatprophet_reposcan-0.3.1-py3-none-any.whl
 ```
 
 The YARA CLI and ShellCheck are separate verification dependencies. Pipx is
@@ -136,6 +136,9 @@ test fixtures remain data.
 Preserve filesystem, race, budget, and incomplete-scan tests. New parsers and
 decoders must have bounds on input, work, and output. Avoid evaluating source
 or following target-supplied paths outside the established read policy.
+
+Maintainers preparing a version should follow the [release guide](docs/releases.md)
+for version updates, verification, tagging, and draft publication.
 
 ## Pull requests
 

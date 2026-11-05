@@ -1,9 +1,9 @@
-# Run from the trusted checkout with its updated renderer installed and YARA.
+# Record RepoScan 0.3.1 from the trusted checkout with its CLI and YARA installed.
 # Setup, reruns, and troubleshooting: docs/demo.md (from the repository root).
 # Reuse the public fixtures copied into /tmp/reposcan-demo-terminal-ux.
 # Requires VHS, ttyd and ffmpeg. No target code is executed.
 # Titles are demo annotations; every report page is unmodified scanner output.
-# The CLI still reports 0.2.0; this is a development terminal preview.
+# Existing media is a historical development preview; this tape targets 0.3.1.
 
 Output docs/assets/reposcan-demo.gif
 Output docs/assets/reposcan-demo.mp4
@@ -39,7 +39,7 @@ Sleep 500ms
 Type@1ms `set +e; unset PROMPT_COMMAND; export PS1='\[\e[36m\]$\[\e[0m\] '; demo_clear() { printf '\033[2J\033[3J\033[H'; }; cd /tmp/reposcan-demo-terminal-ux || exit 1; demo_clear`
 Enter
 Wait+Line /^\$ *$/
-Type@1ms `demo_version=$(reposcan --version); demo_clear; test "$demo_version" = 'RepoScan 0.2.0' && printf 'REPOSCAN_VERSION_OK\n'`
+Type@1ms `demo_version=$(reposcan --version); demo_clear; test "$demo_version" = 'RepoScan 0.3.1' && printf 'REPOSCAN_VERSION_OK\n'`
 Enter
 Wait+Screen /(?m)^REPOSCAN_VERSION_OK$/
 # Clear visible content AND scrollback. VHS Screen waits can otherwise read old
@@ -49,7 +49,7 @@ Enter
 Wait+Line /^\$ *$/
 
 # Opening card. Version is read from the installed CLI above.
-Type@1ms `PS1=''; demo_clear; printf '\033[?25l\n\n\033[1;36mTHREATPROPHET\033[0m\n\n\033[1m%s\033[0m\nDevelopment terminal preview\nCheck the coding assignment before you run it.\n\n\033[90mStatic review | YARA + review checks\nPublic inert fixtures | scanned as file data\033[0m\n' "$demo_version"`
+Type@1ms `PS1=''; demo_clear; printf '\033[?25l\n\n\033[1;36mTHREATPROPHET\033[0m\n\n\033[1m%s\033[0m\nRelease demonstration\nCheck the coding assignment before you run it.\n\n\033[90mStatic review | YARA + review checks\nPublic inert fixtures | scanned as file data\033[0m\n' "$demo_version"`
 Enter
 Wait+Screen /(?m)^Public inert fixtures \| scanned as file data$/
 Show
@@ -86,7 +86,7 @@ Hide
 Type@1ms `demo_scan_status=$?; demo_clear; printf 'REPOSCAN_POSITIVE_STATUS=%s\n' "$demo_scan_status"`
 Enter
 Wait+Screen /(?m)^REPOSCAN_POSITIVE_STATUS=1$/
-# This development layout has 52 lines at width 88. Stop if it changes.
+# This layout has 52 lines at width 88. Stop if it changes.
 Type@1ms `demo_report_lines=$(wc -l < review.txt); demo_clear; printf 'REPOSCAN_REPORT_LINES=%s\n' "$demo_report_lines"`
 Enter
 Wait+Screen /(?m)^REPOSCAN_REPORT_LINES=52$/
