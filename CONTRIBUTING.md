@@ -4,6 +4,32 @@ RepoScan helps developers inspect unfamiliar code before enabling its triggers
 or running project commands. Contributions should improve useful warnings,
 their explanation, or the reliability of the scan boundary.
 
+You can help without writing a detector. A confusing finding, a benign
+counterexample, a clearer explanation, or an independent investigation can
+all lead to a useful improvement.
+
+## Choose a starting point
+
+| What you noticed | Where to start |
+| --- | --- |
+| A crash, installation problem, or incorrect output | [Report a scanner bug](https://github.com/ThreatProphet/RepoScan/issues/new?template=bug_report.yml) with the command and observed behavior. |
+| A suspicious mechanism that is not covered | [Suggest a detection](https://github.com/ThreatProphet/RepoScan/issues/new?template=detection_gap.yml) using a public report or a short description of what is visible before execution. |
+| A warning that overstates the evidence or is not useful | [Review a warning](https://github.com/ThreatProphet/RepoScan/issues/new?template=false_positive.yml) with its exact rule ID and the legitimate behavior it matched. |
+| An unclear instruction, finding explanation, or example | Submit a focused documentation pull request. Describe where a reader gets stuck and show the clearer wording. |
+| A missing test or close benign comparison | Add an inert case and exact expectations. [Detection-quality tests](tests/test_detection_quality.py) and [common-review tests](tests/test_review.py) show the current conventions. |
+
+Small corrections can go straight to a pull request. For a new detector or a
+change to verdicts, an issue helps establish the intended warning before
+substantial implementation. A public report or mechanism description is enough
+to start; a private repository or raw specimen is not required.
+
+The initial report-derived rules come from ThreatProphet investigations of
+developer-task attacks. Research from other publishers is welcome. Link the
+original evidence and explain how it applies to inspecting a repository before
+execution. External research does not need a ThreatProphet report number.
+
+For vulnerabilities in the scanner itself, follow [SECURITY.md](SECURITY.md).
+
 ## Propose a detection
 
 Describe the mechanism and input stage before choosing a predicate:
@@ -47,6 +73,10 @@ delivered bytes. Private specimens should not be added to this repository merely
 to make a public regression test.
 
 ## Verify changes
+
+For documentation and template changes, check formatting, links, and YAML
+syntax where applicable. Use the checks below for scanner, detection, and
+packaging changes, recording which checks apply to your change.
 
 From the trusted RepoScan checkout:
 

@@ -1,0 +1,37 @@
+name: Scanner bug
+description: Report a crash, installation problem, or incorrect scanner behavior.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the problem with the smallest example you can share. A full repository or scan report is not required.
+
+        Keep credentials, personal data, and private source out of this public issue. For vulnerabilities in RepoScan itself, follow [SECURITY.md](https://github.com/ThreatProphet/RepoScan/blob/HEAD/SECURITY.md).
+  - type: textarea
+    id: behavior
+    attributes:
+      label: What happened?
+      description: Describe what you expected and what the scanner did instead.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Scanner and environment
+      description: Include the RepoScan version, platform, engine, command, and exit code if available. Replace identifying path segments.
+      placeholder: |
+        RepoScan version:
+        Platform:
+        Engine and version:
+        Command:
+        Exit code:
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction or relevant output
+      description: Optional steps, a small inert example, or a sanitized output excerpt. Treat target content as data; do not run it to reproduce the scanner problem.
+    validations:
+      required: false
