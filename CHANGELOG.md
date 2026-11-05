@@ -1,10 +1,9 @@
 # Changelog
 
-## 0.2.0 candidate, unreleased
+## 0.2.0 - 2026-11-05
 
-This candidate centers the developer workflow of reviewing an unfamiliar
-repository before trusting, installing, or running it. It remains unreleased;
-installation instructions apply to a trusted checkout containing these changes.
+Version 0.2.0 centers the developer workflow of reviewing an unfamiliar
+repository before trusting, installing, or running it.
 
 ### Added
 

@@ -1,10 +1,8 @@
 # Install and maintain RepoScan
 
-These instructions apply to the **unreleased 0.2.0 candidate** in a trusted
-local checkout. A checkout containing these changes has
-`name = "threatprophet-reposcan"` in `pyproject.toml` and an `install.sh` at its
-root. Apply any supplied candidate patch before following this guide.
-The package has not yet been published to a package index.
+These instructions apply to **RepoScan 0.2.0**. Install from the trusted
+release checkout or source archive. The package has not been published to
+PyPI.
 
 | Name | Purpose |
 | --- | --- |
@@ -32,6 +30,22 @@ contributor verification, but is not needed for the Python engine.
 Installation can download dependencies and run their build steps. The scan
 itself reads the selected target as data. Supply the unfamiliar project only
 as the target argument to `reposcan`.
+
+## Obtain the release
+
+With Git installed, clone the tagged version and enter its directory:
+
+```bash
+git clone --branch v0.2.0 --depth 1 https://github.com/ThreatProphet/RepoScan.git
+cd RepoScan
+```
+
+Alternatively, download the source archive from the
+[v0.2.0 release](https://github.com/ThreatProphet/RepoScan/releases/tag/v0.2.0),
+extract it, and open a terminal in the extracted directory containing
+`pyproject.toml` and `install.sh`.
+
+Choose one installation method below from that trusted directory.
 
 ## Install with pipx
 
@@ -84,7 +98,7 @@ Explicit paths and interpreter selection are available:
 
 ```bash
 bash ./install.sh \
-  --prefix "$HOME/.local/share/threatprophet-reposcan-preview" \
+  --prefix "$HOME/.local/share/threatprophet-reposcan-custom" \
   --bin-dir "$HOME/.local/bin" \
   --python python3
 ```
@@ -166,12 +180,12 @@ from installation and removal.
 ## Migrate from an earlier preview
 
 Earlier previews used `reposcan` as both the distribution and command name.
-This candidate changes the distribution to `threatprophet-reposcan` while
+Version 0.2.0 changes the distribution to `threatprophet-reposcan` while
 retaining the command and Python import.
 
 Inspect an existing pipx installation with `pipx list --json` to identify its
 recorded source. Remove an old ThreatProphet preview under its recorded
-distribution name before installing this candidate. The name `reposcan` alone
+distribution name before installing this version. The name `reposcan` alone
 does not identify which project installed it.
 
 For a manual environment, create a fresh one. Installing both distribution

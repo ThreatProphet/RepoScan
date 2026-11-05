@@ -2,7 +2,7 @@
 
 **Check the coding assignment before you run it.**
 
-[![Preexecution branch CI](https://github.com/ThreatProphet/RepoScan/actions/workflows/ci.yml/badge.svg?branch=feat%2Fpreexecution-review)](https://github.com/ThreatProphet/RepoScan/actions/workflows/ci.yml?query=branch%3Afeat%2Fpreexecution-review)
+[![CI](https://github.com/ThreatProphet/RepoScan/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ThreatProphet/RepoScan/actions/workflows/ci.yml?query=branch%3Amain)
 ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB)
 ![Linux](https://img.shields.io/badge/platform-Linux-444444)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -22,14 +22,15 @@ execution chain is unresolved. Scanning reads the supplied files as data.
 
 ## Quick start
 
-**Unreleased 0.2.0 candidate, Linux, Python 3.10 or later.** These instructions
-apply to a trusted RepoScan checkout containing this candidate's changes.
-A package-index release has not been published.
+**Version 0.2.0, Linux, Python 3.10 or later.** Install the trusted scanner
+from the tagged release checkout.
 
-With [pipx](https://pipx.pypa.io/latest/how-to/install-pipx.html) installed and its
-application directory on your `PATH`, run from the trusted scanner checkout:
+With Git and [pipx](https://pipx.pypa.io/latest/how-to/install-pipx.html) installed,
+and pipx's application directory on your `PATH`:
 
 ```bash
+git clone --branch v0.2.0 --depth 1 https://github.com/ThreatProphet/RepoScan.git
+cd RepoScan
 pipx install '.[yara]'
 reposcan --version
 reposcan /absolute/path/to/received-project
@@ -55,8 +56,8 @@ account, source upload, or LLM API key. Installing RepoScan and its dependencies
 is a separate step that can use the network.
 
 The distribution is named `threatprophet-reposcan`; the command remains
-`reposcan`. Use the local-checkout instructions above until a release is
-published. The unrelated `reposcan` package on PyPI is not this project.
+`reposcan`. The package has not been published to PyPI; use the release-checkout
+instructions above. The unrelated `reposcan` package on PyPI is not this project.
 
 ## See an example finding
 
@@ -196,18 +197,14 @@ credentials, or personal data to a public issue.
 
 ## Project status and documentation
 
-This is an unreleased candidate. Linux is the supported baseline; native
-Windows is unsupported and macOS needs native verification. General data-flow
-analysis, remote repository acquisition, and broader platform support are not
-current features.
+Version 0.2.0 supports Linux. Native Windows is unsupported and macOS needs
+native verification. General data-flow analysis, remote repository acquisition,
+and broader platform support are not current features.
 
 Project-owned code, original rules, tests, and documentation are licensed under
 [MIT](LICENSE). Dependencies and any third-party material retain their own
 licenses and notices. Linked investigations remain subject to their
 publishers' terms.
-
-The CI badge tracks the public `feat/preexecution-review` branch. This
-prepared candidate includes additional packaging and installation changes.
 
 - [Installation and maintenance](docs/installation.md)
 - [Detection guide](docs/detections.md)
