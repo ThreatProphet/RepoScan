@@ -151,21 +151,6 @@ def print_text(
     line(f"RepoScan {__version__}", colors.bold)
     line("Review before trusting, installing, or running.")
     line()
-    verdict_style = colors.yellow if complete and stats.files_scanned == 0 else verdict_color(verdict, colors)
-    field("Verdict", verdict, colors.bold + verdict_style, indent=0)
-    finding_files = len({finding.path for finding in findings})
-    file_label = "file" if finding_files == 1 else "files"
-    field("Findings", f"{len(findings)} across {finding_files} {file_label}", indent=0)
-    if findings:
-        counts = {severity: sum(f.severity == severity for f in findings) for severity in SEVERITY_LABEL}
-        levels = [f"[{SEVERITY_LABEL[severity]} {count}]" for severity, count in counts.items() if count]
-        other = len(findings) - sum(counts.values())
-        if other:
-            levels.append(f"[OTHER {other}]")
-        field("Severity", "  ".join(levels), indent=0, highlight=priority)
-    field("Scanned", f"{stats.files_scanned}/{stats.files_selected} selected files", indent=0)
-    field("Status", f"{status} | scope complete: {'yes' if complete else 'no'}",
-          "" if complete else colors.bold + colors.red, indent=0)
     field("Target", target, colors.cyan, indent=0, preserve_spaces=True)
     display_engine = "lite (heuristic-only; not YARA)" if engine == "lite" else engine
     field("Engine", display_engine, indent=0)
@@ -224,6 +209,23 @@ def print_text(
         skipped += f", {stats.skipped_resource_limit} resource-limited"
     field("Skipped", skipped)
     field("Scope", "Completeness applies to the selected policy; no findings is not a safety guarantee.")
+    line()
+    line("SUMMARY", colors.bold)
+    verdict_style = colors.yellow if complete and stats.files_scanned == 0 else verdict_color(verdict, colors)
+    field("Verdict", verdict, colors.bold + verdict_style, indent=0)
+    finding_files = len({finding.path for finding in findings})
+    file_label = "file" if finding_files == 1 else "files"
+    field("Findings", f"{len(findings)} across {finding_files} {file_label}", indent=0)
+    if findings:
+        counts = {severity: sum(f.severity == severity for f in findings) for severity in SEVERITY_LABEL}
+        levels = [f"[{SEVERITY_LABEL[severity]} {count}]" for severity, count in counts.items() if count]
+        other = len(findings) - sum(counts.values())
+        if other:
+            levels.append(f"[OTHER {other}]")
+        field("Severity", "  ".join(levels), indent=0, highlight=priority)
+    field("Scanned", f"{stats.files_scanned}/{stats.files_selected} selected files", indent=0)
+    field("Status", f"{status} | scope complete: {'yes' if complete else 'no'}",
+          "" if complete else colors.bold + colors.red, indent=0)
     line()
     if not complete:
         field("Next", "Resolve the reported scan errors and rescan; this result is incomplete.",

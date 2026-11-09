@@ -1,9 +1,10 @@
-# Record RepoScan 0.3.1 from the trusted checkout with its CLI and YARA installed.
+# Record the current source checkout with its CLI and YARA installed.
+# Its version is still 0.3.1; the summary-at-end layout is unreleased.
 # Setup, reruns, and troubleshooting: docs/demo.md (from the repository root).
 # Reuse the public fixtures copied into /tmp/reposcan-demo-terminal-ux.
 # Requires VHS, ttyd and ffmpeg. No target code is executed.
 # Titles are demo annotations; every report page is unmodified scanner output.
-# Existing media is a historical development preview; this tape targets 0.3.1.
+# Existing media is a historical development preview and has not been regenerated.
 
 Output docs/assets/reposcan-demo.gif
 Output docs/assets/reposcan-demo.mp4
@@ -49,7 +50,7 @@ Enter
 Wait+Line /^\$ *$/
 
 # Opening card. Version is read from the installed CLI above.
-Type@1ms `PS1=''; demo_clear; printf '\033[?25l\n\n\033[1;36mTHREATPROPHET\033[0m\n\n\033[1m%s\033[0m\nRelease demonstration\nCheck the coding assignment before you run it.\n\n\033[90mStatic review | YARA + review checks\nPublic inert fixtures | scanned as file data\033[0m\n' "$demo_version"`
+Type@1ms `PS1=''; demo_clear; printf '\033[?25l\n\n\033[1;36mTHREATPROPHET\033[0m\n\n\033[1m%s\033[0m\nDevelopment terminal preview\nCheck the coding assignment before you run it.\n\n\033[90mStatic review | YARA + review checks\nPublic inert fixtures | scanned as file data\033[0m\n' "$demo_version"`
 Enter
 Wait+Screen /(?m)^Public inert fixtures \| scanned as file data$/
 Show
@@ -86,33 +87,23 @@ Hide
 Type@1ms `demo_scan_status=$?; demo_clear; printf 'REPOSCAN_POSITIVE_STATUS=%s\n' "$demo_scan_status"`
 Enter
 Wait+Screen /(?m)^REPOSCAN_POSITIVE_STATUS=1$/
-# This layout has 52 lines at width 88. Stop if it changes.
+# This layout has 54 lines at width 88. Stop if it changes.
 Type@1ms `demo_report_lines=$(wc -l < review.txt); demo_clear; printf 'REPOSCAN_REPORT_LINES=%s\n' "$demo_report_lines"`
 Enter
-Wait+Screen /(?m)^REPOSCAN_REPORT_LINES=52$/
+Wait+Screen /(?m)^REPOSCAN_REPORT_LINES=54$/
 
 # Check the saved footer independently of its position in the recording.
 # Strip SGR styling for assertions only; displayed pages keep the original ANSI.
 Type@1ms `sed -E 's/\x1B\[[0-9;]*m//g' review.txt > review-plain.txt && test "$(sed -n '$p' review-plain.txt)" = "Exit code: $demo_scan_status"; demo_footer_status=$?; demo_clear; printf 'REPOSCAN_FOOTER_STATUS=%s\n' "$demo_footer_status"`
 Enter
 Wait+Screen /(?m)^REPOSCAN_FOOTER_STATUS=0$/
-Type@1ms `test "$(sed -n '12p' review-plain.txt)" = '[HIGH]  Finding 1/3' && test "$(sed -n '26p' review-plain.txt)" = '[MEDIUM]  Finding 2/3' && test "$(sed -n '36p' review-plain.txt)" = '[LOW]  Finding 3/3'; demo_layout_status=$?; demo_clear; printf 'REPOSCAN_LAYOUT_STATUS=%s\n' "$demo_layout_status"`
+Type@1ms `test "$(sed -n '7p' review-plain.txt)" = '[HIGH]  Finding 1/3' && test "$(sed -n '21p' review-plain.txt)" = '[MEDIUM]  Finding 2/3' && test "$(sed -n '31p' review-plain.txt)" = '[LOW]  Finding 3/3' && test "$(sed -n '40p' review-plain.txt)" = 'COVERAGE' && test "$(sed -n '45p' review-plain.txt)" = 'SUMMARY'; demo_layout_status=$?; demo_clear; printf 'REPOSCAN_LAYOUT_STATUS=%s\n' "$demo_layout_status"`
 Enter
 Wait+Screen /(?m)^REPOSCAN_LAYOUT_STATUS=0$/
 
-# All 52 report lines appear exactly once across the four saved-report pages.
+# All 54 report lines appear exactly once across the four saved-report pages.
 # Hide only the presentation commands, not the evidence they print.
-Type@1ms `PS1=''; printf '\033[?25l'; demo_heading '02  SCAN RESULT' 'Saved CLI report 1/4 | Web3Market fixture'; sed -n '1,11p' review.txt`
-Enter
-Wait+Screen /Verdict:  review-needed/
-Wait+Screen /Severity: \[HIGH 1\]  \[MEDIUM 1\]  \[LOW 1\]/
-Wait+Screen /Scanned:  2\/2 selected files/
-Sleep 100ms
-Show
-Sleep 5s
-
-Hide
-Type@1ms `demo_heading '03  MATCHED PATTERN' 'Saved CLI report 2/4 | Inspect the file and match locations'; sed -n '12,25p' review.txt`
+Type@1ms `PS1=''; printf '\033[?25l'; demo_heading '02  MATCHED PATTERN' 'Saved CLI report 1/4 | Inspect the file and match locations'; sed -n '1,20p' review.txt`
 Enter
 Wait+Screen /\[HIGH\]  Finding 1\/3/
 Wait+Screen /TP_DevelTask_Node_InlineArray_Remote_Execution/
@@ -122,7 +113,7 @@ Sleep 9s
 Screenshot docs/assets/reposcan-demo-poster.png
 
 Hide
-Type@1ms `demo_heading '04  ENCODED DESTINATION' 'Saved CLI report 3/4 | Review the URL and its use'; sed -n '26,35p' review.txt`
+Type@1ms `demo_heading '03  ENCODED DESTINATION' 'Saved CLI report 2/4 | Review the URL and its use'; sed -n '21,30p' review.txt`
 Enter
 Wait+Screen /\[MEDIUM\]  Finding 2\/3/
 Wait+Screen /REVIEW_Encoded_Character_Array/
@@ -131,10 +122,20 @@ Show
 Sleep 6s
 
 Hide
-Type@1ms `demo_heading '05  DECODER AND RESULT' 'Saved CLI report 4/4 | Review the surrounding code'; sed -n '36,$p' review.txt`
+Type@1ms `demo_heading '04  CHARACTER DECODER' 'Saved CLI report 3/4 | Review the surrounding code'; sed -n '31,39p' review.txt`
 Enter
 Wait+Screen /\[LOW\]  Finding 3\/3/
 Wait+Screen /REVIEW_Character_Code_Decoder/
+Show
+Sleep 5s
+
+Hide
+Type@1ms `demo_heading '05  COVERAGE AND SUMMARY' 'Saved CLI report 4/4 | Review the result and inspected scope'; sed -n '40,$p' review.txt`
+Enter
+Wait+Screen /(?m)^SUMMARY$/
+Wait+Screen /Verdict:  review-needed/
+Wait+Screen /Severity: \[HIGH 1\]  \[MEDIUM 1\]  \[LOW 1\]/
+Wait+Screen /Scanned:  2\/2 selected files/
 Wait+Screen /(?m)^Exit code: 1$/
 Show
 Sleep 7s

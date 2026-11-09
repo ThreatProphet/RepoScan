@@ -81,8 +81,19 @@ partially failed reads. Directory entries and results are sorted.
 
 The matching deadline is not a total job deadline. Supported deadline handling
 depends on the main-thread POSIX CLI environment. Linux is the supported
-baseline. macOS requires native verification of the filesystem and timer
-primitives; native Windows is unsupported.
+baseline. macOS 15 Apple Silicon and Intel are qualification targets, with
+native CI for filesystem/timer behavior and fresh installation. A release
+must pass those jobs and exact-artifact launcher checks before advertising
+macOS support. Native Windows is unsupported.
+
+The optional `reposcan-run.sh` prepares trusted tooling in private state
+outside the target. Its runtime/version selection does not alter scanner
+semantics. It verifies downloaded uv/scanner artifacts, uses a managed Python
+and pinned native YARA dependency, excludes target configuration and inherited
+tool overrides, and hands the target to the existing CLI. Setup can use the
+network; scanning does not acquire target code. Source and generated release
+launchers have explicit wheel pins, documented in the
+[installation guide](installation.md#run-once-with-the-shell-launcher).
 
 The scanner resists path replacement but does not freeze the entire directory
 tree. A file can be edited in place during a scan. A finding's SHA-256 identifies

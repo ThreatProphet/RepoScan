@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+### Added
+
+- A portable `reposcan-run.sh` quick-run entry point that prepares a private
+  pinned uv/CPython/YARA environment and scans with a verified release wheel.
+  It supports cached offline operation, preserves scanner results and exit
+  codes, and leaves permanent installations and the scanned project separate.
+- Native macOS 15 qualification jobs for Apple Silicon and Intel, retaining
+  Linux/Python 3.10 and 3.12 coverage. macOS support remains pending successful
+  native CI and exact release-artifact checks.
+- Launcher verification from empty runtime state, with benign/review/high-risk
+  inputs, ignored project configuration and tool overrides, intact inputs,
+  offline reuse, and rejection of corrupted cached artifacts.
+- Release-generated launchers bound to the exact wheel version and SHA-256.
+  The release workflow verifies that artifact on Linux and both Mac
+  architectures before creating its draft, and includes the launcher in
+  uploaded checksums.
+
+### Changed
+
+- Terminal reports end with the verdict, finding and severity counts, scanned
+  file totals, and completion status after the findings and coverage details.
+  Target and engine context remain at the top; follow-up guidance and the
+  actual exit code follow the summary.
+- The README leads with running a first scan; permanent installation remains
+  available for regular use.
+- Installer and installation gates accept Darwin for native qualification.
+  Test harnesses account for platform descriptor paths and short Unix-socket
+  path limits without changing the scanner's target-read policy.
+
 ## 0.3.1 - 2026-11-05
 
 RepoScan 0.3.1 makes findings easier to interpret and the codebase easier to

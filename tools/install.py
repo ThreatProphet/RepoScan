@@ -112,8 +112,8 @@ def reject_command_collision(command: Path) -> None:
 
 
 def preflight(prefix: Path, binary_directory: Path, source: Path) -> None:
-    if sys.platform != "linux":
-        raise InstallationError("This installer currently supports Linux only.")
+    if sys.platform not in {"linux", "darwin"}:
+        raise InstallationError("This installer supports Linux and macOS.")
     if sys.version_info < (3, 10):
         raise InstallationError("Python 3.10 or later is required; select it with --python.")
     if not (source / "pyproject.toml").is_file() or not (source / "src/reposcan/scanner.py").is_file():

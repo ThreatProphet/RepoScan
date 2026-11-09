@@ -28,6 +28,42 @@ def arguments(prefix: Path, binary_directory: Path, python: str = sys.executable
     return ["--prefix", str(prefix), "--bin-dir", str(binary_directory), "--python", python]
 
 
+@pytest.mark.parametrize("platform", ["linux", "darwin"])
+def test_supported_platform_preflight_has_no_installation_side_effects(
+    installer: ModuleType,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    platform: str,
+) -> None:
+    prefix = tmp_path / "new-environment"
+    binary_directory = tmp_path / "new-bin"
+    monkeypatch.setattr(installer.sys, "platform", platform)
+
+    installer.preflight(prefix, binary_directory, REPO_ROOT)
+
+    assert not prefix.exists()
+    assert not binary_directory.exists()
+
+
+@pytest.mark.parametrize("platform", ["win32", "freebsd13"])
+def test_unsupported_platform_stops_before_creating_an_environment(
+    installer: ModuleType,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    tmp_path: Path,
+    platform: str,
+) -> None:
+    prefix = tmp_path / "new-environment"
+    binary_directory = tmp_path / "new-bin"
+    monkeypatch.setattr(installer.sys, "platform", platform)
+    monkeypatch.setattr(installer, "run", lambda *_args, **_kwargs: pytest.fail("installation command was started"))
+
+    assert installer.main(arguments(prefix, binary_directory)) == 1
+    assert "supports Linux and macOS" in capsys.readouterr().err
+    assert not prefix.exists()
+    assert not binary_directory.exists()
+
+
 @pytest.mark.parametrize("kind", ["directory", "file", "dangling-symlink"])
 def test_existing_environment_is_never_modified(installer: ModuleType, tmp_path: Path, kind: str) -> None:
     prefix = tmp_path / "existing"
