@@ -1,8 +1,9 @@
 # Install and maintain RepoScan
 
-The checked-in quick-run launcher is pinned to **RepoScan 0.3.1**. Permanent
-installation examples also use that published version. The package has not
-been published to PyPI.
+Release installation examples target **RepoScan 0.4.0**; its tag and download
+links become available after publication. The checked-in quick-run launcher
+remains pinned to **RepoScan 0.3.1** until the published 0.4.0 wheel is available
+for the follow-up pin update. The package has not been published to PyPI.
 
 | Name | Purpose |
 | --- | --- |
@@ -15,16 +16,17 @@ path in `pipx install '.[yara]'` selects this checkout explicitly.
 
 ## Requirements and scope
 
-RepoScan's supported baseline is Linux with Python 3.10 or later. The quick-run
-launcher provides its own tested Python version and currently selects Linux
-x86-64/glibc or macOS 15+ arm64/x86-64. **macOS remains a qualification
-candidate until the native jobs and exact release-artifact checks pass.**
+RepoScan requires Python 3.10 or later. The quick-run launcher provides its own
+tested Python version and selects Linux x86-64/glibc or macOS 15+ arm64/x86-64.
+Native CI has passed on Linux and both configured Mac platforms. Publication
+of 0.4.0 additionally requires successful checks of its exact release launcher
+and wheel on those platforms.
 Native Windows is unsupported. Linux musl and other CPU architectures are not
 qualified for this launcher. An installation tool's platform support alone
 does not establish RepoScan support.
 
-CI retains Linux/Python 3.10 and 3.12 and adds macOS 15 Apple Silicon and Intel
-with Python 3.12. The launcher selects managed CPython 3.12.16, build 20261026;
+CI covers Linux/Python 3.10 and 3.12 and macOS 15 Apple Silicon and Intel with
+Python 3.12. The launcher selects managed CPython 3.12.16, build 20261026;
 this does not change the scanner's general Python 3.10+ requirement.
 
 The permanent convenience and manual installation paths need working Python `venv`
@@ -41,14 +43,19 @@ as the target argument to `reposcan`.
 
 ## Run once with the shell launcher
 
-Use the [checked-in launcher](../reposcan-run.sh) from a trusted directory
+Download the [v0.4.0 release launcher](https://github.com/ThreatProphet/RepoScan/releases/download/v0.4.0/reposcan-run.sh)
+once the release is published, following the
+[README quick start](../README.md#run-your-first-scan). From its trusted directory
 outside the unfamiliar project:
 
 ```sh
 sh ./reposcan-run.sh "/absolute/path/to/received-project"
 ```
 
-For a download without cloning RepoScan, use the [README quick start](../README.md#run-your-first-scan).
+The [checked-in source launcher](../reposcan-run.sh) also accepts these commands,
+but it remains pinned to 0.3.1 until the post-publication update. Running it
+does not preview edits to the local scanner source.
+
 The script uses portable `sh` syntax. It requires ordinary system utilities
 including `curl`, `tar`, and the platform's SHA-256 utility, plus HTTPS access
 for the first run. It does not require an existing Python installation or a
@@ -65,10 +72,11 @@ Explicit caller HTTPS proxy and TLS certificate settings are retained for
 managed networks; TLS verification remains enabled. Settings from the target's
 `.env`, `uv.toml`, or `pyproject.toml` are not loaded.
 
-The source launcher pins uv 0.13.7, CPython 3.12.16/build 20261026,
-`yara-python` 4.5.4, and the already published RepoScan 0.3.1 wheel. Dependencies
-are stored separately from any permanent RepoScan installation. Its private
-state defaults to:
+Both launchers pin uv 0.13.7, CPython 3.12.16/build 20261026, and `yara-python`
+4.5.4. The generated v0.4.0 release launcher pins its exact 0.4.0 wheel; the
+source launcher still pins the already published RepoScan 0.3.1 wheel.
+Dependencies are stored separately from any permanent RepoScan installation.
+Private state defaults to:
 
 ```text
 $HOME/.local/share/threatprophet-reposcan-run
@@ -117,12 +125,12 @@ also be removed separately.
 
 ### Versioned release launchers
 
-The existing v0.3.1 release has no launcher asset. Starting with the next
-release prepared by the updated workflow, `reposcan-run.sh` will be attached
-alongside the wheel and included in `SHA256SUMS`. That generated script pins
-the exact version and wheel digest from its release. Prefer it for reproducible
-automation, and keep it with the corresponding checksums. The source launcher
-is updated separately after the new wheel is publicly available.
+The existing v0.3.1 release has no launcher asset. The v0.4.0 workflow generates
+`reposcan-run.sh` alongside the wheel and includes it in `SHA256SUMS`. That
+script pins the exact version and wheel digest from its release. Prefer the
+release asset for reproducible automation, and keep it with the corresponding
+checksums. The source launcher is updated separately after the new wheel is
+publicly available.
 
 Runtime preparation uses declared upstream distribution services; the actual
 scan reads local data. Dependency isolation is not an operating-system sandbox.
@@ -132,12 +140,12 @@ scan reads local data. Dependency isolation is not an operating-system sandbox.
 With Git installed, clone the tagged version and enter its directory:
 
 ```bash
-git clone --branch v0.3.1 --depth 1 https://github.com/ThreatProphet/RepoScan.git
+git clone --branch v0.4.0 --depth 1 https://github.com/ThreatProphet/RepoScan.git
 cd RepoScan
 ```
 
 Alternatively, download the source archive from the
-[v0.3.1 release](https://github.com/ThreatProphet/RepoScan/releases/tag/v0.3.1),
+[v0.4.0 release](https://github.com/ThreatProphet/RepoScan/releases/tag/v0.4.0),
 extract it, and open a terminal in the extracted directory containing
 `pyproject.toml` and `install.sh`.
 

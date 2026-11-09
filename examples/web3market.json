@@ -150,10 +150,10 @@
     "skipped_symlinks": 0
   },
   "status": "complete",
-  "target": "/tmp/reposcan-example-blfcdi61/web3market-entry",
+  "target": "/tmp/reposcan-example-x7vp2qxc/web3market-entry",
   "tool": {
     "name": "RepoScan",
-    "version": "0.3.1"
+    "version": "0.4.0"
   },
   "verdict": "review-needed"
 }

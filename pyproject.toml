@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "threatprophet-reposcan"
-version = "0.3.1"
+version = "0.4.0"
 description = "Static review of unfamiliar repositories before trusting, installing, or running them"
 readme = "README.md"
 license = "MIT"

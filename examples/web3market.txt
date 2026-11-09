@@ -1,7 +1,7 @@
-RepoScan 0.3.1
+RepoScan 0.4.0
 Review before trusting, installing, or running.
 
-Target:   /tmp/reposcan-example-lqskfpso/web3market-entry
+Target:   /tmp/reposcan-example-x7vp2qxc/web3market-entry
 Engine:   yara-python
 
 [HIGH]  Finding 1/3
