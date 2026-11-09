@@ -1,9 +1,8 @@
 # Install and maintain RepoScan
 
-Release installation examples target **RepoScan 0.4.0**; its tag and download
-links become available after publication. The checked-in quick-run launcher
-remains pinned to **RepoScan 0.3.1** until the published 0.4.0 wheel is available
-for the follow-up pin update. The package has not been published to PyPI.
+Release installation examples target **RepoScan 0.4.0**. The release launcher
+and the source launcher on the current `main` branch pin the published wheel's
+version and SHA-256. The package has not been published to PyPI.
 
 | Name | Purpose |
 | --- | --- |
@@ -18,9 +17,8 @@ path in `pipx install '.[yara]'` selects this checkout explicitly.
 
 RepoScan requires Python 3.10 or later. The quick-run launcher provides its own
 tested Python version and selects Linux x86-64/glibc or macOS 15+ arm64/x86-64.
-Native CI has passed on Linux and both configured Mac platforms. Publication
-of 0.4.0 additionally requires successful checks of its exact release launcher
-and wheel on those platforms.
+Native CI and checks of the exact 0.4.0 release launcher and wheel passed on
+Linux and both configured Mac platforms.
 Native Windows is unsupported. Linux musl and other CPU architectures are not
 qualified for this launcher. An installation tool's platform support alone
 does not establish RepoScan support.
@@ -44,17 +42,16 @@ as the target argument to `reposcan`.
 ## Run once with the shell launcher
 
 Download the [v0.4.0 release launcher](https://github.com/ThreatProphet/RepoScan/releases/download/v0.4.0/reposcan-run.sh)
-once the release is published, following the
-[README quick start](../README.md#run-your-first-scan). From its trusted directory
-outside the unfamiliar project:
+following the [README quick start](../README.md#run-your-first-scan). From its
+trusted directory outside the unfamiliar project:
 
 ```sh
 sh ./reposcan-run.sh "/absolute/path/to/received-project"
 ```
 
-The [checked-in source launcher](../reposcan-run.sh) also accepts these commands,
-but it remains pinned to 0.3.1 until the post-publication update. Running it
-does not preview edits to the local scanner source.
+The [source launcher on the current `main` branch](../reposcan-run.sh) also
+accepts these commands and runs the published 0.4.0 wheel. Running it does not
+preview edits to the local scanner source.
 
 The script uses portable `sh` syntax. It requires ordinary system utilities
 including `curl`, `tar`, and the platform's SHA-256 utility, plus HTTPS access
@@ -73,8 +70,8 @@ managed networks; TLS verification remains enabled. Settings from the target's
 `.env`, `uv.toml`, or `pyproject.toml` are not loaded.
 
 Both launchers pin uv 0.13.7, CPython 3.12.16/build 20261026, and `yara-python`
-4.5.4. The generated v0.4.0 release launcher pins its exact 0.4.0 wheel; the
-source launcher still pins the already published RepoScan 0.3.1 wheel.
+4.5.4. Both the generated v0.4.0 release launcher and the current `main` launcher
+pin the exact published RepoScan 0.4.0 wheel.
 Dependencies are stored separately from any permanent RepoScan installation.
 Private state defaults to:
 
@@ -131,6 +128,10 @@ script pins the exact version and wheel digest from its release. Prefer the
 release asset for reproducible automation, and keep it with the corresponding
 checksums. The source launcher is updated separately after the new wheel is
 publicly available.
+
+The source launcher at the immutable `v0.4.0` tag retains its preparation-time
+0.3.1 pin. Use the release launcher asset or the current `main` launcher to run
+0.4.0 through this launch path.
 
 Runtime preparation uses declared upstream distribution services; the actual
 scan reads local data. Dependency isolation is not an operating-system sandbox.

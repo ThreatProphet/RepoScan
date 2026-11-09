@@ -1,8 +1,8 @@
 #!/bin/sh
 # Quick-run launcher. Keep this file outside the repository being inspected.
 # Artifact pins are reviewed inputs, never values supplied by the scan target.
-REPOSCAN_VERSION='0.3.1'
-REPOSCAN_WHEEL_SHA256='c93319502a508e40a370caab0703b7888d211559c6f1cceca30a76d4efa70730'
+REPOSCAN_VERSION='0.4.0'
+REPOSCAN_WHEEL_SHA256='37b81a1cf574be974d1304885518256b5b65f2f070bbe11630e01e5aa26e2e85'
 UV_VERSION='0.13.7'
 PYTHON_VERSION='3.12.16'
 PYTHON_BUILD='20261026'

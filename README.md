@@ -22,41 +22,44 @@ execution chain is unresolved. Scanning reads the supplied files as data.
 
 ## Run your first scan
 
-Download the small launcher from the **v0.4.0 release** into a temporary
-directory and give it the path to the project. Release download links become
-available when v0.4.0 is published. Run these commands from a trusted terminal
-outside the received repository:
+### 1. Download the script
+
+Download [reposcan-run.sh](https://github.com/ThreatProphet/RepoScan/releases/download/v0.4.0/reposcan-run.sh),
+or use one of these commands. Save the script outside the project you want to scan.
+
+**curl:**
 
 ```sh
-launcher_dir="$(mktemp -d)" &&
-curl --fail --location --proto '=https' --tlsv1.2 \
-  https://github.com/ThreatProphet/RepoScan/releases/download/v0.4.0/reposcan-run.sh \
-  --output "$launcher_dir/reposcan-run.sh" &&
-sh "$launcher_dir/reposcan-run.sh" "/absolute/path/to/received-project"
+curl -fL -o reposcan-run.sh \
+  https://github.com/ThreatProphet/RepoScan/releases/download/v0.4.0/reposcan-run.sh
 ```
 
-You can inspect the downloaded script before running the last command.
-The release launcher runs RepoScan 0.4.0. In a trusted source checkout,
-`sh ./reposcan-run.sh /absolute/path/to/received-project` still runs the pinned
-0.3.1 wheel until the source launcher is refreshed after publication.
+**wget:**
 
-**No existing Python, uv, pipx, Homebrew, or administrator access is required
-for this launch path.** The first run downloads a pinned private Python/YARA
-runtime and the released scanner; subsequent runs reuse it. Setup messages go
-to stderr, and the scanner's output and exit codes are preserved. Exit `1` or
-`2` means findings, not an installation failure.
+```sh
+wget -O reposcan-run.sh \
+  https://github.com/ThreatProphet/RepoScan/releases/download/v0.4.0/reposcan-run.sh
+```
 
-The launcher targets Linux x86-64 with glibc and macOS 15+ on Apple Silicon or
-Intel. Native CI has passed on Linux and both Mac architectures; publication
-also requires verification of the exact release launcher and wheel on those
-platforms. Each release launcher is pinned to its own wheel's version and
-SHA-256. See [quick-run details](docs/installation.md#run-once-with-the-shell-launcher)
-for platform scope, caching, offline use, and versioned release launchers.
+### 2. Scan the project
+
+From the folder containing the downloaded script:
+
+```sh
+sh ./reposcan-run.sh /absolute/path/to/target/dir
+```
+
+No Python installation is required. The first scan downloads the scanner and
+its private runtime; subsequent scans reuse them.
+
+Supports Linux x86-64 with glibc and macOS 15+ on Apple Silicon or Intel.
+See the [installation guide](docs/installation.md) for platform requirements,
+offline use and other installation options.
 
 ## Install for regular use
 
 **Version 0.4.0, Python 3.10 or later.** Install the trusted scanner from the
-tagged release checkout after publication. See the
+tagged release checkout. See the
 [platform requirements](docs/installation.md#requirements-and-scope) for scope.
 
 With Git and [pipx](https://pipx.pypa.io/latest/how-to/install-pipx.html) installed,

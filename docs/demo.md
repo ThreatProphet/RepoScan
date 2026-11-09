@@ -14,9 +14,9 @@ capture was not used to produce them.
 
 The tape and commands below prepare a new 0.4.0 recording of the same
 workflow, with the summary after the findings and coverage. The existing media
-has not been regenerated as part of this source update. The published 0.3.1 wheel
-used by `reposcan-run.sh` retains the earlier ordering; install this checkout
-in the recording environment to reproduce the new layout.
+has not been regenerated as part of this source update. Install the trusted
+0.4.0 checkout in the recording environment as described below. The source
+launcher runs the published wheel, so it does not preview local source edits.
 
 Run these commands in **Bash on Linux**, from the root of a trusted RepoScan
 checkout that contains this guide and `docs/demo.tape`. Keep that documentation

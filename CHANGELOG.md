@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Changed
+
+- Refreshed the checked-in quick-run launcher to the published RepoScan 0.4.0
+  wheel and its verified SHA-256, and updated the source-launcher instructions.
+- Updated the pinned checkout and Python setup actions to releases that declare
+  Node 24, retaining the existing CI matrix and release qualification gates.
+
 ## 0.4.0 - 2026-11-09
 
 RepoScan 0.4.0 adds a quick-run shell launcher for a first scan without an
