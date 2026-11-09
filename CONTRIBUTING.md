@@ -106,12 +106,12 @@ python3 -m venv .venv
 shellcheck install.sh tools/scan_task.sh reposcan-run.sh
 yara -w src/reposcan/rules/*.yar /dev/null
 .venv/bin/python -m build
-.venv/bin/python tools/verify_wheel.py dist/threatprophet_reposcan-0.3.1-py3-none-any.whl
-.venv/bin/python tools/verify_install.py dist/threatprophet_reposcan-0.3.1-py3-none-any.whl
-.venv/bin/python tools/prepare_launcher.py dist/threatprophet_reposcan-0.3.1-py3-none-any.whl \
+.venv/bin/python tools/verify_wheel.py dist/threatprophet_reposcan-0.4.0-py3-none-any.whl
+.venv/bin/python tools/verify_install.py dist/threatprophet_reposcan-0.4.0-py3-none-any.whl
+.venv/bin/python tools/prepare_launcher.py dist/threatprophet_reposcan-0.4.0-py3-none-any.whl \
   --output dist/reposcan-run.sh
 .venv/bin/python tools/verify_launcher.py --launcher dist/reposcan-run.sh \
-  --wheel dist/threatprophet_reposcan-0.3.1-py3-none-any.whl
+  --wheel dist/threatprophet_reposcan-0.4.0-py3-none-any.whl
 ```
 
 The YARA CLI and ShellCheck are separate verification dependencies. Pipx is
@@ -152,11 +152,12 @@ existing system Python to satisfy the launcher's runtime, and positive
 fixtures are never executed.
 
 CI runs the existing suites and installation gates on Ubuntu/Python 3.10 and
-3.12 plus native macOS 15 Apple Silicon and Intel/Python 3.12. The new Mac
-matrix is qualification evidence only after its jobs pass. Record the actual
-platform and any skips in a pull request; a Linux run does not establish Mac
-support. Keep target filesystem and timeout protections intact when fixing a
-platform-specific harness assumption.
+3.12 plus native macOS 15 Apple Silicon and Intel/Python 3.12. All four native
+jobs passed for the merged quick-run changes. Each release must additionally
+qualify its exact uploaded launcher and wheel on Linux and both Mac platforms.
+Record the actual platform and any skips in a pull request; a Linux run does
+not establish Mac support. Keep target filesystem and timeout protections
+intact when fixing a platform-specific harness assumption.
 
 ### Update launcher runtime pins
 

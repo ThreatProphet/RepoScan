@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.4.0 - 2026-11-09
+
+RepoScan 0.4.0 adds a quick-run shell launcher for a first scan without an
+existing Python installation, native macOS qualification, and a terminal
+summary that follows the findings and coverage details.
+
 ### Added
 
 - A portable `reposcan-run.sh` quick-run entry point that prepares a private
@@ -9,8 +15,9 @@
   It supports cached offline operation, preserves scanner results and exit
   codes, and leaves permanent installations and the scanned project separate.
 - Native macOS 15 qualification jobs for Apple Silicon and Intel, retaining
-  Linux/Python 3.10 and 3.12 coverage. macOS support remains pending successful
-  native CI and exact release-artifact checks.
+  Linux/Python 3.10 and 3.12 coverage. All four native CI jobs passed for the
+  merged changes. Publication also requires checks of the exact release
+  launcher and wheel on Linux and both Mac architectures.
 - Launcher verification from empty runtime state, with benign/review/high-risk
   inputs, ignored project configuration and tool overrides, intact inputs,
   offline reuse, and rejection of corrupted cached artifacts.
@@ -30,6 +37,17 @@
 - Installer and installation gates accept Darwin for native qualification.
   Test harnesses account for platform descriptor paths and short Unix-socket
   path limits without changing the scanner's target-read policy.
+
+### Compatibility
+
+- Detection rules, review checks, verdicts and exit-code meanings are unchanged.
+- JSON schema 1.0 and the Markdown report format are preserved; the reported
+  tool version is now 0.4.0.
+- The scanner retains Python 3.10+ support. The quick-run launcher manages its
+  own pinned CPython 3.12 runtime and YARA dependency.
+- Use the `reposcan-run.sh` release asset to run this release. The checked-in
+  source launcher remains pinned to the published 0.3.1 wheel during release
+  preparation and is refreshed separately after publication.
 
 ## 0.3.1 - 2026-11-05
 

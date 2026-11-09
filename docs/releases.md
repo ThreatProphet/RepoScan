@@ -14,9 +14,10 @@ draft is the final maintainer step. The workflow does not publish to PyPI.
 ## 1. Prepare the version in a pull request
 
 Start from current `origin/main` on a release-preparation branch and select a
-new, unpublished version. The examples below retain the current `0.3.1`
-artifact names; replace them with that chosen version. **v0.3.1 is already
-published and must not be recreated or reused for these new changes.**
+new, unpublished version. The examples below use `0.4.0`, the version being
+prepared in this checkout. **v0.3.1 is already published and must not be
+recreated or reused for these new changes.** For a later release, choose a new
+version and update the example artifact names accordingly.
 
 Update these together:
 
@@ -39,6 +40,11 @@ Update these together:
 Preserve historical changelog entries and migration notes. Changing the tool
 version does not itself require changing the JSON schema version.
 
+For 0.4.0 preparation, keep the checked-in `reposcan-run.sh` pinned to the
+published 0.3.1 wheel. The release workflow generates a separate launcher
+for 0.4.0 after building its wheel. Update the source pin only after publication,
+using the actual public wheel as described below.
+
 Follow [the contributor checks](../CONTRIBUTING.md#verify-changes), merge the
 preparation pull request, and wait for CI on its merged commit to pass. The
 CI matrix covers Linux with Python 3.10 and 3.12 plus macOS 15 Apple Silicon and
@@ -59,7 +65,7 @@ before pushing it. An existing tag is an error; there is no force option.
 ```bash
 (
   set -eu
-  release_version=REPLACE_WITH_NEW_VERSION
+  release_version=0.4.0
   release_tag="v$release_version"
 
   test -z "$(git status --porcelain)"
@@ -100,8 +106,8 @@ signed in with maintainer access. The draft must contain the notes extracted
 from the tagged changelog and these four uploaded assets, with the chosen
 version in both distribution filenames:
 
-- `threatprophet_reposcan-0.3.1-py3-none-any.whl`
-- `threatprophet_reposcan-0.3.1.tar.gz`
+- `threatprophet_reposcan-0.4.0-py3-none-any.whl`
+- `threatprophet_reposcan-0.4.0.tar.gz`
 - `reposcan-run.sh`
 - `SHA256SUMS`
 
@@ -153,9 +159,9 @@ new version, then validate and push its tag. Explain the correction in its
 changelog entry. Do not attach artifacts built from a different commit to an
 older tag or disable the validation gates to make it pass.
 
-For this release, `v0.3.0` pointed to source that still declared version 0.2.0.
+Previously, `v0.3.0` pointed to source that still declared version 0.2.0.
 Its release preparation failed before producing release assets. The corrective
-release is `v0.3.1`; the original tag is retained.
+release was `v0.3.1`; the original tag is retained.
 
 A transient infrastructure failure can be retried for the same tag when its
 source and metadata are already correct. If a draft already exists, inspect it

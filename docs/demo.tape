@@ -1,5 +1,5 @@
-# Record the current source checkout with its CLI and YARA installed.
-# Its version is still 0.3.1; the summary-at-end layout is unreleased.
+# Record RepoScan 0.4.0 from the trusted checkout with its CLI and YARA installed.
+# The summary follows the findings and coverage details.
 # Setup, reruns, and troubleshooting: docs/demo.md (from the repository root).
 # Reuse the public fixtures copied into /tmp/reposcan-demo-terminal-ux.
 # Requires VHS, ttyd and ffmpeg. No target code is executed.
@@ -40,7 +40,7 @@ Sleep 500ms
 Type@1ms `set +e; unset PROMPT_COMMAND; export PS1='\[\e[36m\]$\[\e[0m\] '; demo_clear() { printf '\033[2J\033[3J\033[H'; }; cd /tmp/reposcan-demo-terminal-ux || exit 1; demo_clear`
 Enter
 Wait+Line /^\$ *$/
-Type@1ms `demo_version=$(reposcan --version); demo_clear; test "$demo_version" = 'RepoScan 0.3.1' && printf 'REPOSCAN_VERSION_OK\n'`
+Type@1ms `demo_version=$(reposcan --version); demo_clear; test "$demo_version" = 'RepoScan 0.4.0' && printf 'REPOSCAN_VERSION_OK\n'`
 Enter
 Wait+Screen /(?m)^REPOSCAN_VERSION_OK$/
 # Clear visible content AND scrollback. VHS Screen waits can otherwise read old
@@ -50,7 +50,7 @@ Enter
 Wait+Line /^\$ *$/
 
 # Opening card. Version is read from the installed CLI above.
-Type@1ms `PS1=''; demo_clear; printf '\033[?25l\n\n\033[1;36mTHREATPROPHET\033[0m\n\n\033[1m%s\033[0m\nDevelopment terminal preview\nCheck the coding assignment before you run it.\n\n\033[90mStatic review | YARA + review checks\nPublic inert fixtures | scanned as file data\033[0m\n' "$demo_version"`
+Type@1ms `PS1=''; demo_clear; printf '\033[?25l\n\n\033[1;36mTHREATPROPHET\033[0m\n\n\033[1m%s\033[0m\nRelease demonstration\nCheck the coding assignment before you run it.\n\n\033[90mStatic review | YARA + review checks\nPublic inert fixtures | scanned as file data\033[0m\n' "$demo_version"`
 Enter
 Wait+Screen /(?m)^Public inert fixtures \| scanned as file data$/
 Show

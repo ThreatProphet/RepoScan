@@ -22,21 +22,23 @@ execution chain is unresolved. Scanning reads the supplied files as data.
 
 ## Run your first scan
 
-Download the small launcher into a temporary directory and give it the path
-to the project. Run these commands from a trusted terminal outside the
-received repository:
+Download the small launcher from the **v0.4.0 release** into a temporary
+directory and give it the path to the project. Release download links become
+available when v0.4.0 is published. Run these commands from a trusted terminal
+outside the received repository:
 
 ```sh
 launcher_dir="$(mktemp -d)" &&
 curl --fail --location --proto '=https' --tlsv1.2 \
-  https://raw.githubusercontent.com/ThreatProphet/RepoScan/main/reposcan-run.sh \
+  https://github.com/ThreatProphet/RepoScan/releases/download/v0.4.0/reposcan-run.sh \
   --output "$launcher_dir/reposcan-run.sh" &&
 sh "$launcher_dir/reposcan-run.sh" "/absolute/path/to/received-project"
 ```
 
-You can inspect the downloaded script before running the last command. If you
-already have a trusted RepoScan checkout, use
-`sh ./reposcan-run.sh /absolute/path/to/received-project`.
+You can inspect the downloaded script before running the last command.
+The release launcher runs RepoScan 0.4.0. In a trusted source checkout,
+`sh ./reposcan-run.sh /absolute/path/to/received-project` still runs the pinned
+0.3.1 wheel until the source launcher is refreshed after publication.
 
 **No existing Python, uv, pipx, Homebrew, or administrator access is required
 for this launch path.** The first run downloads a pinned private Python/YARA
@@ -44,24 +46,24 @@ runtime and the released scanner; subsequent runs reuse it. Setup messages go
 to stderr, and the scanner's output and exit codes are preserved. Exit `1` or
 `2` means findings, not an installation failure.
 
-The launcher targets Linux x86-64 with glibc. **macOS 15+ on Apple Silicon and
-Intel is a qualification candidate**: native CI and exact release-artifact
-checks are included, and must pass before macOS is advertised as supported.
-The checked-in launcher currently runs **RepoScan 0.3.1**. That existing release
-predates launcher assets; future release jobs generate a launcher pinned to
-their own exact wheel. See [quick-run details](docs/installation.md#run-once-with-the-shell-launcher)
+The launcher targets Linux x86-64 with glibc and macOS 15+ on Apple Silicon or
+Intel. Native CI has passed on Linux and both Mac architectures; publication
+also requires verification of the exact release launcher and wheel on those
+platforms. Each release launcher is pinned to its own wheel's version and
+SHA-256. See [quick-run details](docs/installation.md#run-once-with-the-shell-launcher)
 for platform scope, caching, offline use, and versioned release launchers.
 
 ## Install for regular use
 
-**Version 0.3.1, Linux, Python 3.10 or later.** Install the trusted scanner
-from the tagged release checkout.
+**Version 0.4.0, Python 3.10 or later.** Install the trusted scanner from the
+tagged release checkout after publication. See the
+[platform requirements](docs/installation.md#requirements-and-scope) for scope.
 
 With Git and [pipx](https://pipx.pypa.io/latest/how-to/install-pipx.html) installed,
 and pipx's application directory on your `PATH`:
 
 ```bash
-git clone --branch v0.3.1 --depth 1 https://github.com/ThreatProphet/RepoScan.git
+git clone --branch v0.4.0 --depth 1 https://github.com/ThreatProphet/RepoScan.git
 cd RepoScan
 pipx install '.[yara]'
 reposcan --version
@@ -266,9 +268,11 @@ credentials, or personal data to a public issue.
 
 ## Project status and documentation
 
-Version 0.3.1 supports Linux. Native Windows is unsupported and macOS needs
-native verification. General data-flow analysis, remote repository acquisition,
-and broader platform support are not current features.
+Version 0.4.0 adds the quick-run launcher and native macOS qualification.
+Linux and both configured macOS CI jobs have passed; the release workflow
+must also verify the exact artifacts before publication. Native Windows is
+unsupported. General data-flow analysis, remote repository acquisition, and
+broader platform support are not current features.
 
 Project-owned code, original rules, tests, and documentation are licensed under
 [MIT](LICENSE). Dependencies and any third-party material retain their own

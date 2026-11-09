@@ -1,9 +1,9 @@
-# Record the current RepoScan source demonstration
+# Record the RepoScan 0.4.0 demonstration
 
-The [recording source](demo.tape) targets the **current source checkout** against
-public, inert fixtures. Its version remains **0.3.1**, but the summary-at-end
-layout is unreleased. It shows a benign baseline, three Web3Market review
-findings, and the scanner's actual exit status. The fixture files are read as data.
+The [recording source](demo.tape) targets **RepoScan 0.4.0** against public,
+inert fixtures. It shows a benign baseline, three Web3Market review findings,
+the summary after coverage, and the scanner's actual exit status. The fixture
+files are read as data.
 
 The checked-in GIF, MP4, and poster currently show a **historical development
 preview**. They were produced from the updated terminal renderer while its CLI
@@ -12,7 +12,7 @@ terminal preview`. The original `v0.2.0` release had the earlier terminal layout
 These assets are rendered replays of captured CLI output; a native VHS browser
 capture was not used to produce them.
 
-The tape and commands below prepare a new development recording of the same
+The tape and commands below prepare a new 0.4.0 recording of the same
 workflow, with the summary after the findings and coverage. The existing media
 has not been regenerated as part of this source update. The published 0.3.1 wheel
 used by `reposcan-run.sh` retains the earlier ordering; install this checkout
@@ -26,7 +26,7 @@ checkout separate from any unfamiliar project you are inspecting.
 
 You need:
 
-- **The current RepoScan source with `yara-python`**, installed from this trusted checkout
+- **RepoScan 0.4.0 with `yara-python`**, installed from this trusted checkout
   into a recording environment. A separate YARA CLI does not satisfy the
   tape's explicit Python engine choice.
 - **[VHS](https://github.com/charmbracelet/vhs/tree/v0.12.1#installation)**,
@@ -56,8 +56,8 @@ reposcan --version
 vhs --version
 ```
 
-The scanner must print `RepoScan 0.3.1`; that version alone does not establish
-that it uses the current source. The preflight below also checks its 88-column
+The scanner must print `RepoScan 0.4.0`; the import check above establishes
+that it uses this checkout. The preflight below also checks its 88-column
 layout, findings, and footer. This recording does not change
 RepoScan's Python 3.10+ support. Keep the recording environment active when
 launching VHS.
@@ -74,7 +74,7 @@ home directory. Create a fresh directory and copy only the two fixture trees:
 (
   set -eu
   test -f docs/demo.tape
-  test "$(reposcan --version)" = 'RepoScan 0.3.1'
+  test "$(reposcan --version)" = 'RepoScan 0.4.0'
   demo_root=/tmp/reposcan-demo-terminal-ux
   mkdir -m 700 "$demo_root"
   cp -R tests/fixtures/benign "$demo_root/benign-project"
@@ -101,7 +101,7 @@ exit status and checks the page boundaries before recording:
 ```bash
 (
   set -eu
-  test "$(reposcan --version)" = 'RepoScan 0.3.1'
+  test "$(reposcan --version)" = 'RepoScan 0.4.0'
   cd /tmp/reposcan-demo-terminal-ux
 
   reposcan benign-project --engine yara-python --color always --width 88
@@ -173,7 +173,7 @@ the displayed scanner exit `1` remains the expected review result.
 
 Open the generated media and check that:
 
-- The opening card identifies RepoScan 0.3.1 as a development terminal preview, and the complete benign baseline is visible.
+- The opening card identifies RepoScan 0.4.0 as a release demonstration, and the complete benign baseline is visible.
 - All four saved-report pages are readable, including the three findings.
 - The final report page shows coverage, the summary, and `Exit code: 1`, followed by the closing guidance.
 - The prompt and displayed paths contain no personal information.
@@ -218,7 +218,7 @@ guide to describe the version and capture method actually used.
 
 | Symptom | What to check |
 | --- | --- |
-| `reposcan` is missing or the version check times out | Activate the recording environment, check `command -v reposcan`, and confirm `reposcan --version` prints `RepoScan 0.3.1`. |
+| `reposcan` is missing or the version check times out | Activate the recording environment, check `command -v reposcan`, and confirm `reposcan --version` prints `RepoScan 0.4.0`. |
 | `--width` is unrecognized or the old layout appears | Install this checkout with `python -m pip install --editable '.[yara]'`; check the source import and command paths. The published 0.3.1 wheel still places the summary first. |
 | The Python YARA engine is unavailable | Install the scanner with `[yara]` in the environment supplying `reposcan`. Do not switch to Lite to make the recording pass. |
 | The exit status, 54-line check, or page-boundary check fails | Run the preflight, inspect `review-plain.txt`, and confirm the fixture directories contain only the documented files. Resolve the mismatch before rendering. |
