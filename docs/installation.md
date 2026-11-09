@@ -1,8 +1,8 @@
 # Install and maintain RepoScan
 
-These instructions apply to **RepoScan 0.3.1**. Install from the trusted
-release checkout or source archive. The package has not been published to
-PyPI.
+The checked-in quick-run launcher is pinned to **RepoScan 0.3.1**. Permanent
+installation examples also use that published version. The package has not
+been published to PyPI.
 
 | Name | Purpose |
 | --- | --- |
@@ -15,11 +15,19 @@ path in `pipx install '.[yara]'` selects this checkout explicitly.
 
 ## Requirements and scope
 
-RepoScan supports Linux with Python 3.10 or later. Native Windows is
-unsupported; macOS needs native verification. An installation tool's support
-for other platforms does not establish RepoScan support.
+RepoScan's supported baseline is Linux with Python 3.10 or later. The quick-run
+launcher provides its own tested Python version and currently selects Linux
+x86-64/glibc or macOS 15+ arm64/x86-64. **macOS remains a qualification
+candidate until the native jobs and exact release-artifact checks pass.**
+Native Windows is unsupported. Linux musl and other CPU architectures are not
+qualified for this launcher. An installation tool's platform support alone
+does not establish RepoScan support.
 
-The convenience and manual installation paths need working Python `venv`
+CI retains Linux/Python 3.10 and 3.12 and adds macOS 15 Apple Silicon and Intel
+with Python 3.12. The launcher selects managed CPython 3.12.16, build 20261026;
+this does not change the scanner's general Python 3.10+ requirement.
+
+The permanent convenience and manual installation paths need working Python `venv`
 support, including the ability to create an environment with pip.
 
 Install the scanner from its trusted checkout, separate from the unfamiliar
@@ -30,6 +38,94 @@ contributor verification, but is not needed for the Python engine.
 Installation can download dependencies and run their build steps. The scan
 itself reads the selected target as data. Supply the unfamiliar project only
 as the target argument to `reposcan`.
+
+## Run once with the shell launcher
+
+Use the [checked-in launcher](../reposcan-run.sh) from a trusted directory
+outside the unfamiliar project:
+
+```sh
+sh ./reposcan-run.sh "/absolute/path/to/received-project"
+```
+
+For a download without cloning RepoScan, use the [README quick start](../README.md#run-your-first-scan).
+The script uses portable `sh` syntax. It requires ordinary system utilities
+including `curl`, `tar`, and the platform's SHA-256 utility, plus HTTPS access
+for the first run. It does not require an existing Python installation or a
+package manager, modify shell profiles, or expose a permanent command.
+
+The launcher checks embedded SHA-256 values for uv and the scanner wheel
+before using them. It prepares a managed CPython runtime, installs the pinned
+`yara-python` wheel without a source-build fallback, and verifies versions,
+package origin, resources, and a native YARA operation. The received project
+is passed to the scanner only after preparation succeeds. Runtime provisioning
+and scanning run outside that project, with project configuration and inherited
+Python/uv overrides excluded.
+Explicit caller HTTPS proxy and TLS certificate settings are retained for
+managed networks; TLS verification remains enabled. Settings from the target's
+`.env`, `uv.toml`, or `pyproject.toml` are not loaded.
+
+The source launcher pins uv 0.13.7, CPython 3.12.16/build 20261026,
+`yara-python` 4.5.4, and the already published RepoScan 0.3.1 wheel. Dependencies
+are stored separately from any permanent RepoScan installation. Its private
+state defaults to:
+
+```text
+$HOME/.local/share/threatprophet-reposcan-run
+```
+
+Set `REPOSCAN_RUN_HOME` to an absolute alternative if needed. The state must be
+outside the target, owned by the current user, protected against other users'
+writes, and free of symlink path components. The launcher refuses conflicting
+or unsafe state rather than overwriting it. It retains a setup lock while
+preparing the runtime; remove a stale lock only after confirming no launcher
+is still preparing that state.
+
+Subsequent runs reuse the downloaded components. To prohibit downloads:
+
+```sh
+sh ./reposcan-run.sh --offline "/absolute/path/to/received-project"
+```
+
+An offline first run fails with an explanation of the missing cache. Explicit
+scanner options follow the target. Relative targets are interpreted relative
+to the caller; explicit `--rules` and `--ignore-config` paths must be absolute
+because the launcher switches to its own working directory.
+
+```sh
+sh ./reposcan-run.sh "/absolute/path/to/received-project" --format json > review.json
+sh ./reposcan-run.sh --offline "/absolute/path/to/received-project" --color never
+sh ./reposcan-run.sh --help
+sh ./reposcan-run.sh --version
+```
+
+Keep reports outside the target. Help and version output do not create an
+environment or make network requests; `--version` identifies the pins and does
+not assert runtime readiness. Setup diagnostics use stderr, preserving JSON on
+stdout. Launcher usage errors return `64`, setup failures return `70`, and an
+actual scan retains the [normal exit meanings](../README.md#read-the-result).
+
+The scanner continues to reject symlinks in supplied target path components.
+On macOS, logical paths through `/tmp` or `/var` can encounter system symlinks;
+use the intended physical path when required. The launcher does not relax the
+scanner's no-follow policy.
+
+To remove the quick-run runtime, remove only the private state directory you
+selected after all scans have finished. Deleting that state does not uninstall
+a separately installed `reposcan` command. Downloaded launcher scripts can
+also be removed separately.
+
+### Versioned release launchers
+
+The existing v0.3.1 release has no launcher asset. Starting with the next
+release prepared by the updated workflow, `reposcan-run.sh` will be attached
+alongside the wheel and included in `SHA256SUMS`. That generated script pins
+the exact version and wheel digest from its release. Prefer it for reproducible
+automation, and keep it with the corresponding checksums. The source launcher
+is updated separately after the new wheel is publicly available.
+
+Runtime preparation uses declared upstream distribution services; the actual
+scan reads local data. Dependency isolation is not an operating-system sandbox.
 
 ## Obtain the release
 

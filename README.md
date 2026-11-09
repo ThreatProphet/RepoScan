@@ -17,10 +17,42 @@ Report-derived YARA rules work alongside broader static review checks, so an
 unusual hook or obfuscated construct can warrant inspection even when the full
 execution chain is unresolved. Scanning reads the supplied files as data.
 
-[Quick start](#quick-start) · [Example finding](#see-an-example-finding) ·
+[Run your first scan](#run-your-first-scan) · [Example finding](#see-an-example-finding) ·
 [Detection coverage](docs/detections.md) · [Contribute](#help-improve-detection)
 
-## Quick start
+## Run your first scan
+
+Download the small launcher into a temporary directory and give it the path
+to the project. Run these commands from a trusted terminal outside the
+received repository:
+
+```sh
+launcher_dir="$(mktemp -d)" &&
+curl --fail --location --proto '=https' --tlsv1.2 \
+  https://raw.githubusercontent.com/ThreatProphet/RepoScan/main/reposcan-run.sh \
+  --output "$launcher_dir/reposcan-run.sh" &&
+sh "$launcher_dir/reposcan-run.sh" "/absolute/path/to/received-project"
+```
+
+You can inspect the downloaded script before running the last command. If you
+already have a trusted RepoScan checkout, use
+`sh ./reposcan-run.sh /absolute/path/to/received-project`.
+
+**No existing Python, uv, pipx, Homebrew, or administrator access is required
+for this launch path.** The first run downloads a pinned private Python/YARA
+runtime and the released scanner; subsequent runs reuse it. Setup messages go
+to stderr, and the scanner's output and exit codes are preserved. Exit `1` or
+`2` means findings, not an installation failure.
+
+The launcher targets Linux x86-64 with glibc. **macOS 15+ on Apple Silicon and
+Intel is a qualification candidate**: native CI and exact release-artifact
+checks are included, and must pass before macOS is advertised as supported.
+The checked-in launcher currently runs **RepoScan 0.3.1**. That existing release
+predates launcher assets; future release jobs generate a launcher pinned to
+their own exact wheel. See [quick-run details](docs/installation.md#run-once-with-the-shell-launcher)
+for platform scope, caching, offline use, and versioned release launchers.
+
+## Install for regular use
 
 **Version 0.3.1, Linux, Python 3.10 or later.** Install the trusted scanner
 from the tagged release checkout.
@@ -56,8 +88,9 @@ account, source upload, or LLM API key. Installing RepoScan and its dependencies
 is a separate step that can use the network.
 
 The distribution is named `threatprophet-reposcan`; the command remains
-`reposcan`. The package has not been published to PyPI; use the release-checkout
-instructions above. The unrelated `reposcan` package on PyPI is not this project.
+`reposcan`. The package has not been published to PyPI; use the quick-run
+launcher or release-checkout instructions above. The unrelated `reposcan`
+package on PyPI is not this project.
 
 ## Watch a scan
 
@@ -76,21 +109,16 @@ A scan with no findings is not a guarantee of safety.
 
 ## See an example finding
 
-From the trusted release checkout used for installation, scan the reduced
-Web3Market fixture with the installed scanner:
+From a trusted current RepoScan checkout, use your Python/YARA development
+environment to scan the reduced Web3Market fixture with the source renderer:
 
 ```bash
-reposcan tests/fixtures/web3market-entry --engine yara-python --color never --width 100
+python -I tools/scan_task.py tests/fixtures/web3market-entry --engine yara-python --color never --width 100
 ```
 
 Selected output from the real CLI, with other lines omitted:
 
 ```text
-Verdict:  review-needed
-Findings: 3 across 2 files
-Severity: [HIGH 1]  [MEDIUM 1]  [LOW 1]
-Scanned:  2/2 selected files
-
 [HIGH]  Finding 1/3
   Location: controllers/users.js.fixture:3
   Why:      Web3Market-style inline-array import, character-decoded fetch, JSON token extraction,
@@ -100,6 +128,16 @@ Scanned:  2/2 selected files
   Rule:     TP_DevelTask_Node_InlineArray_Remote_Execution
   Source:   yara-python
   Report:   TP-2026-018
+
+SUMMARY
+Verdict:  review-needed
+Findings: 3 across 2 files
+Severity: [HIGH 1]  [MEDIUM 1]  [LOW 1]
+Scanned:  2/2 selected files
+Status:   complete | scope complete: yes
+
+Next:     Review the flagged files and their execution context before running the project.
+Exit code: 1
 ```
 
 Exit `1` is expected because the fixture produces review findings. Its two

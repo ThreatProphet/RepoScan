@@ -41,10 +41,10 @@ def mutate_after_discovery(monkeypatch: pytest.MonkeyPatch, mutation: Any) -> No
 
 
 def process_file_descriptors() -> set[int]:
-    descriptor_directory = Path("/proc/self/fd")
-    if not descriptor_directory.is_dir():
-        pytest.skip("file-descriptor accounting requires Linux /proc/self/fd")
-    return {int(entry.name) for entry in descriptor_directory.iterdir() if entry.name.isdigit()}
+    for descriptor_directory in (Path("/proc/self/fd"), Path("/dev/fd")):
+        if descriptor_directory.is_dir():
+            return {int(entry.name) for entry in descriptor_directory.iterdir() if entry.name.isdigit()}
+    pytest.skip("file-descriptor accounting requires /proc/self/fd or /dev/fd")
 
 
 @pytest.mark.posix
@@ -217,6 +217,7 @@ def test_directory_identity_failures_do_not_leak_descriptors(tmp_path: Path) -> 
     expected_stat = selected.lstat()
     selected.rename(tmp_path / "selected-before-swap")
     selected.mkdir()
+    replacement_stat = selected.stat()
     before = process_file_descriptors()
 
     for _ in range(50):
@@ -236,10 +237,10 @@ def test_directory_identity_failures_do_not_leak_descriptors(tmp_path: Path) -> 
     watched_descriptors: list[int] = []
     for descriptor in after - before:
         try:
-            destination = os.readlink(f"/proc/self/fd/{descriptor}")
+            opened_stat = os.fstat(descriptor)
         except OSError:
             continue
-        if destination == str(selected):
+        if (opened_stat.st_dev, opened_stat.st_ino) == (replacement_stat.st_dev, replacement_stat.st_ino):
             watched_descriptors.append(descriptor)
 
     try:

@@ -1,12 +1,7 @@
 RepoScan 0.3.1
 Review before trusting, installing, or running.
 
-Verdict:  review-needed
-Findings: 3 across 2 files
-Severity: [HIGH 1]  [MEDIUM 1]  [LOW 1]
-Scanned:  2/2 selected files
-Status:   complete | scope complete: yes
-Target:   /tmp/reposcan-example-blfcdi61/web3market-entry
+Target:   /tmp/reposcan-example-lqskfpso/web3market-entry
 Engine:   yara-python
 
 [HIGH]  Finding 1/3
@@ -44,6 +39,13 @@ Engine:   yara-python
 COVERAGE
   Skipped:  0 ignored entries, 0 oversized, 0 symlinks, 0 special files
   Scope:    Completeness applies to the selected policy; no findings is not a safety guarantee.
+
+SUMMARY
+Verdict:  review-needed
+Findings: 3 across 2 files
+Severity: [HIGH 1]  [MEDIUM 1]  [LOW 1]
+Scanned:  2/2 selected files
+Status:   complete | scope complete: yes
 
 Next:     Review the flagged files and their execution context before running the project.
 Exit code: 1

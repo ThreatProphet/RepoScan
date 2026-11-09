@@ -103,11 +103,15 @@ python3 -m venv .venv
 .venv/bin/python -m pytest
 .venv/bin/python -m ruff check src tools tests
 .venv/bin/python -m compileall -q src tools
-shellcheck install.sh tools/scan_task.sh
+shellcheck install.sh tools/scan_task.sh reposcan-run.sh
 yara -w src/reposcan/rules/*.yar /dev/null
 .venv/bin/python -m build
 .venv/bin/python tools/verify_wheel.py dist/threatprophet_reposcan-0.3.1-py3-none-any.whl
 .venv/bin/python tools/verify_install.py dist/threatprophet_reposcan-0.3.1-py3-none-any.whl
+.venv/bin/python tools/prepare_launcher.py dist/threatprophet_reposcan-0.3.1-py3-none-any.whl \
+  --output dist/reposcan-run.sh
+.venv/bin/python tools/verify_launcher.py --launcher dist/reposcan-run.sh \
+  --wheel dist/threatprophet_reposcan-0.3.1-py3-none-any.whl
 ```
 
 The YARA CLI and ShellCheck are separate verification dependencies. Pipx is
@@ -115,7 +119,7 @@ included in the `dev` extra for installation verification. Record skipped or
 unavailable checks accurately. Changes to engine behavior should be checked
 across both canonical adapters when available.
 
-Package changes should pass both installation gates:
+Package changes should pass the installation and launcher gates:
 
 - `tools/verify_wheel.py` installs the exact wheel without dependencies or
   network access into a fresh environment and runs outside the source checkout.
@@ -126,6 +130,50 @@ Package changes should pass both installation gates:
   inert Web3Market case with `yara-python`, and removal. Dependencies are
   resolved over the network unless `--wheelhouse /absolute/path/to/wheels`
   supplies the required artifacts for an offline run.
+- `tools/prepare_launcher.py` binds a release launcher to the exact built
+  wheel version and SHA-256. `tools/verify_launcher.py` exercises it with empty
+  private uv/Python/YARA state. Supplying `--wheel` seeds only that exact wheel
+  into the normal verified cache because an unpublished release URL does not
+  exist yet. It does not skip the launcher's checksum or runtime checks.
+  Benign, review and high-risk scans verify exits `0`, `1` and `2`; offline
+  reuse, usage errors, target integrity, ignored project settings and corrupt
+  cached artifacts are also checked. First-time runtime preparation needs the
+  network, even when the scanner wheel is supplied locally.
+
+For a change to the source launcher's published download path or pins, also run:
+
+```bash
+.venv/bin/python tools/verify_launcher.py
+```
+
+This downloads the source launcher's actual pinned public wheel into fresh
+state. It complements exact candidate-wheel checks. Neither command uses an
+existing system Python to satisfy the launcher's runtime, and positive
+fixtures are never executed.
+
+CI runs the existing suites and installation gates on Ubuntu/Python 3.10 and
+3.12 plus native macOS 15 Apple Silicon and Intel/Python 3.12. The new Mac
+matrix is qualification evidence only after its jobs pass. Record the actual
+platform and any skips in a pull request; a Linux run does not establish Mac
+support. Keep target filesystem and timeout protections intact when fixing a
+platform-specific harness assumption.
+
+### Update launcher runtime pins
+
+Keep runtime updates separate from detection changes. `reposcan-run.sh`
+declares the uv version, platform archive hashes, exact CPython version and
+build date, YARA version, and scanner wheel pins. Obtain uv archive hashes
+from the matching [official uv release](https://github.com/astral-sh/uv/releases),
+and confirm the Python version/build/platform combination in that uv tag's
+`crates/uv-python-managed/download-metadata.json`. Confirm prebuilt native
+YARA wheels for every advertised platform. Do not replace these with mutable
+`latest` references or enable source builds to make a qualification job pass.
+
+Use `tools/prepare_launcher.py` for scanner-wheel version/hash changes. Run the
+source launcher against its published artifacts and the generated launcher
+against the candidate wheel, then require the native matrix. The launcher
+unit tests use only temporary test copies with inert artifacts; production
+has no URL or hash override that bypasses artifact verification.
 
 Changes to the convenience installer also need a fresh `install.sh` run with
 temporary `--prefix` and `--bin-dir` directories. Verify that engine checks

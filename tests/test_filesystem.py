@@ -56,15 +56,17 @@ def test_symlinks_and_fifo_are_policy_skips(tmp_path: Path) -> None:
 
 
 @pytest.mark.posix
-def test_socket_is_a_policy_skip(tmp_path: Path) -> None:
+def test_socket_is_a_policy_skip(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     socket_path = tmp_path / "unix-socket"
+    # The temporary root can exceed macOS's AF_UNIX path-length limit.
+    monkeypatch.chdir(tmp_path)
     try:
         unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     except PermissionError:
         pytest.skip("AF_UNIX socket creation is prohibited by this execution environment")
     try:
         try:
-            unix_socket.bind(str(socket_path))
+            unix_socket.bind(socket_path.name)
         except PermissionError:
             pytest.skip("restricted environment does not permit AF_UNIX bind")
         result = run_scanner(tmp_path, "--engine", "lite", timeout=5)

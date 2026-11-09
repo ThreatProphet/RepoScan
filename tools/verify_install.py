@@ -54,7 +54,7 @@ print(json.dumps({'origin': str(origin), 'version': reposcan.__version__,
 
 
 def verify(wheel: Path, wheelhouse: Path | None) -> None:
-    require(sys.platform.startswith("linux"), "this installation gate currently supports Linux")
+    require(sys.platform in {"linux", "darwin"}, "this installation gate supports Linux and macOS")
     source = Path(__file__).resolve().parents[1]
     fixture = source / "tests" / "fixtures" / "web3market-entry"
     require(fixture.is_dir(), f"missing inert fixture: {fixture}")

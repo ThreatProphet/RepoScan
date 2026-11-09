@@ -1,8 +1,9 @@
-# Record the RepoScan 0.3.1 demonstration
+# Record the current RepoScan source demonstration
 
-The [recording source](demo.tape) targets **RepoScan 0.3.1** against public,
-inert fixtures. It shows a benign baseline, three Web3Market review findings,
-and the scanner's actual exit status. The fixture files are read as data.
+The [recording source](demo.tape) targets the **current source checkout** against
+public, inert fixtures. Its version remains **0.3.1**, but the summary-at-end
+layout is unreleased. It shows a benign baseline, three Web3Market review
+findings, and the scanner's actual exit status. The fixture files are read as data.
 
 The checked-in GIF, MP4, and poster currently show a **historical development
 preview**. They were produced from the updated terminal renderer while its CLI
@@ -11,8 +12,11 @@ terminal preview`. The original `v0.2.0` release had the earlier terminal layout
 These assets are rendered replays of captured CLI output; a native VHS browser
 capture was not used to produce them.
 
-The tape and commands below prepare a new 0.3.1 recording of the same workflow.
-The existing media has not been regenerated as part of this source update.
+The tape and commands below prepare a new development recording of the same
+workflow, with the summary after the findings and coverage. The existing media
+has not been regenerated as part of this source update. The published 0.3.1 wheel
+used by `reposcan-run.sh` retains the earlier ordering; install this checkout
+in the recording environment to reproduce the new layout.
 
 Run these commands in **Bash on Linux**, from the root of a trusted RepoScan
 checkout that contains this guide and `docs/demo.tape`. Keep that documentation
@@ -22,7 +26,7 @@ checkout separate from any unfamiliar project you are inspecting.
 
 You need:
 
-- **RepoScan 0.3.1 with `yara-python`**, installed from this trusted checkout
+- **The current RepoScan source with `yara-python`**, installed from this trusted checkout
   into a recording environment. A separate YARA CLI does not satisfy the
   tape's explicit Python engine choice.
 - **[VHS](https://github.com/charmbracelet/vhs/tree/v0.12.1#installation)**,
@@ -52,8 +56,9 @@ reposcan --version
 vhs --version
 ```
 
-The scanner must print `RepoScan 0.3.1`. The preflight below also checks its
-88-column layout, findings, and footer. This recording does not change
+The scanner must print `RepoScan 0.3.1`; that version alone does not establish
+that it uses the current source. The preflight below also checks its 88-column
+layout, findings, and footer. This recording does not change
 RepoScan's Python 3.10+ support. Keep the recording environment active when
 launching VHS.
 
@@ -109,13 +114,15 @@ exit status and checks the page boundaries before recording:
 
   printf 'Received-project exit status: %s\n' "$demo_scan_status"
   test "$demo_scan_status" -eq 1
-  test "$(wc -l < review.txt)" -eq 52
+  test "$(wc -l < review.txt)" -eq 54
   sed -E 's/\x1B\[[0-9;]*m//g' review.txt > review-plain.txt
-  test "$(sed -n '12p' review-plain.txt)" = '[HIGH]  Finding 1/3'
-  test "$(sed -n '26p' review-plain.txt)" = '[MEDIUM]  Finding 2/3'
-  test "$(sed -n '36p' review-plain.txt)" = '[LOW]  Finding 3/3'
+  test "$(sed -n '7p' review-plain.txt)" = '[HIGH]  Finding 1/3'
+  test "$(sed -n '21p' review-plain.txt)" = '[MEDIUM]  Finding 2/3'
+  test "$(sed -n '31p' review-plain.txt)" = '[LOW]  Finding 3/3'
+  test "$(sed -n '40p' review-plain.txt)" = 'COVERAGE'
+  test "$(sed -n '45p' review-plain.txt)" = 'SUMMARY'
   test "$(sed -n '$p' review-plain.txt)" = "Exit code: $demo_scan_status"
-  printf 'Preflight passed: expected status, 52 report lines, page boundaries, and footer.\n'
+  printf 'Preflight passed: expected status, 54 report lines, page boundaries, and footer.\n'
 )
 ```
 
@@ -138,10 +145,10 @@ The four report pages cover every saved line exactly once:
 
 | Page | Saved lines | Content |
 | --- | --- | --- |
-| Scan result | 1-11 | Verdict, finding counts, severity counts, and scan status |
-| Matched pattern | 12-25 | High-severity finding and its evidence |
-| Encoded destination | 26-35 | Medium-severity finding and its evidence |
-| Decoder and result | 36-52 | Low-severity finding, coverage, next step, and exit code |
+| Matched pattern | 1-20 | Header, target, engine, and high-severity finding with its evidence |
+| Encoded destination | 21-30 | Medium-severity finding and its evidence |
+| Character decoder | 31-39 | Low-severity finding and its evidence |
+| Coverage and summary | 40-54 | Coverage, verdict, finding counts, scan status, next step, and exit code |
 
 ## 4. Validate and render
 
@@ -166,13 +173,13 @@ the displayed scanner exit `1` remains the expected review result.
 
 Open the generated media and check that:
 
-- The opening card identifies RepoScan 0.3.1 and the complete benign baseline is visible.
+- The opening card identifies RepoScan 0.3.1 as a development terminal preview, and the complete benign baseline is visible.
 - All four saved-report pages are readable, including the three findings.
-- The final report page shows `Exit code: 1`, followed by the closing guidance.
+- The final report page shows coverage, the summary, and `Exit code: 1`, followed by the closing guidance.
 - The prompt and displayed paths contain no personal information.
 
 The numbered headings and opening/closing cards are presentation annotations.
-The report pages display all 52 saved report lines, without rewriting them.
+The report pages display all 54 saved report lines, without rewriting them.
 Keep that distinction when changing the presentation. Check the asset changes
 before committing:
 
@@ -212,9 +219,9 @@ guide to describe the version and capture method actually used.
 | Symptom | What to check |
 | --- | --- |
 | `reposcan` is missing or the version check times out | Activate the recording environment, check `command -v reposcan`, and confirm `reposcan --version` prints `RepoScan 0.3.1`. |
-| `--width` is unrecognized or the old layout appears | Install this checkout with `python -m pip install --editable '.[yara]'`; check the source import and command paths. The released 0.2.0 build does not contain the new renderer. |
+| `--width` is unrecognized or the old layout appears | Install this checkout with `python -m pip install --editable '.[yara]'`; check the source import and command paths. The published 0.3.1 wheel still places the summary first. |
 | The Python YARA engine is unavailable | Install the scanner with `[yara]` in the environment supplying `reposcan`. Do not switch to Lite to make the recording pass. |
-| The exit status, 52-line check, or page-boundary check fails | Run the preflight, inspect `review-plain.txt`, and confirm the fixture directories contain only the documented files. Resolve the mismatch before rendering. |
+| The exit status, 54-line check, or page-boundary check fails | Run the preflight, inspect `review-plain.txt`, and confirm the fixture directories contain only the documented files. Resolve the mismatch before rendering. |
 | A screen wait shows an old heading or never sees the footer | Use the current tape, including `demo_clear` with `\033[2J\033[3J\033[H`. Clearing scrollback is required as well as the visible screen. |
 | Text wraps differently or a report page is cut off | Check the font and the tape's dimensions. Recheck all four pages after any layout change. |
 | VHS cannot launch its browser or terminal server | Check the upstream VHS setup and use an environment where those components can run. Tape validation alone does not establish that rendering will work. |
