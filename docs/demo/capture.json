@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-11-09T19:29:42.317372+00:00",
+  "source_commit": "cf640f59e6834d40e0226f472b88c5cdd7c1d8f5",
+  "capture_method": "POSIX PTY, stdout and stderr captured separately",
+  "release": {
+    "version": "0.4.0",
+    "launcher_url": "https://github.com/ThreatProphet/RepoScan/releases/download/v0.4.0/reposcan-run.sh",
+    "launcher_sha256": "fbec95c102e3b33691c9b14d232f12eb252c72409813eac9842244b8201ec2bb",
+    "wheel_sha256": "37b81a1cf574be974d1304885518256b5b65f2f070bbe11630e01e5aa26e2e85"
+  },
+  "terminal": {
+    "columns": 88,
+    "rows": 32
+  },
+  "runtime_cache": "fresh at scan start",
+  "fixture_integrity": "unchanged",
+  "fixtures": {
+    "controllers/users.js.fixture": "3c518161baa8bec93a06b64f576f0d562956f970eef8bfe5bb1f0fbec0ad2838",
+    "models/User.js.fixture": "fa1a6c1f0daf1adca89f98e8d63ec8145a3396db7133fb6397367b5ebde04570"
+  },
+  "download": {
+    "argv": [
+      "curl",
+      "-fL",
+      "-o",
+      "reposcan-run.sh",
+      "https://github.com/ThreatProphet/RepoScan/releases/download/v0.4.0/reposcan-run.sh"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 10.971,
+    "stdout": "",
+    "stderr": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\n  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\n  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0\n  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0\n  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     0\n  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0\n  0     0    0     0    0     0      0      0 --:--:--  0:00:05 --:--:--     0\n  0     0    0     0    0     0      0      0 --:--:--  0:00:05 --:--:--     0\n  0     0    0     0    0     0      0      0 --:--:--  0:00:06 --:--:--     0\n  0     0    0     0    0     0      0      0 --:--:--  0:00:06 --:--:--     0\n\n  0     0    0     0    0     0      0      0 --:--:--  0:00:07 --:--:--     0\n  0     0    0     0    0     0      0      0 --:--:--  0:00:08 --:--:--     0\n  0     0    0     0    0     0      0      0 --:--:--  0:00:09 --:--:--     0\n  0     0    0     0    0     0      0      0 --:--:--  0:00:10 --:--:--     0\n100 15537  100 15537    0     0   1417      0  0:00:10  0:00:10 --:--:--  4114\n"
+  },
+  "scan": {
+    "argv": [
+      "sh",
+      "./reposcan-run.sh",
+      "/tmp/reposcan-demo-v040/received-project"
+    ],
+    "exit_code": 1,
+    "elapsed_seconds": 53.439,
+    "stdout": "\u001b[1mRepoScan 0.4.0\u001b[0m\r\nReview before trusting, installing, or running.\u001b[0m\r\n\u001b[0m\r\n\u001b[1mTarget:   \u001b[0m\u001b[36m/tmp/reposcan-demo-v040/received-project\u001b[0m\r\n\u001b[1mEngine:   \u001b[0myara-python\u001b[0m\r\n\u001b[0m\r\n\u001b[1m\u001b[31m[HIGH]\u001b[0m  Finding 1/3\r\n\u001b[1m  Location: \u001b[0m\u001b[1m\u001b[36mcontrollers/users.js.fixture:3\u001b[0m\r\n\u001b[1m  Why:      \u001b[0mWeb3Market-style inline-array import, character-decoded fetch, JSON token\u001b[0m\r\n            extraction, and call context coexist\u001b[0m\r\n\u001b[1m  Match:    \u001b[0m\u001b[1m\u001b[36mline 3\u001b[0m | byte 191 | 23 bytes | \u001b[35m$import\u001b[0m\r\n\u001b[1m  Match:    \u001b[0m\u001b[1m\u001b[36mline 7\u001b[0m | byte 300 | 11 bytes | \u001b[35m$token_extract\u001b[0m\r\n\u001b[1m  Match:    \u001b[0m\u001b[1m\u001b[36mline 7\u001b[0m | byte 325 | 26 bytes | \u001b[35m$decoded_fetch\u001b[0m\r\n\u001b[1m  Match:    \u001b[0m\u001b[1m\u001b[36mline 7\u001b[0m | byte 365 | 7 bytes | \u001b[35m$json\u001b[0m\r\n\u001b[1m  More:     \u001b[0m1 more recorded location in JSON/Markdown.\u001b[0m\r\n\u001b[1m  Review:   \u001b[0mreport-pattern | confidence: medium\u001b[0m\r\n\u001b[1m  Rule:     \u001b[0mTP_DevelTask_Node_InlineArray_Remote_Execution\u001b[0m\r\n\u001b[1m  Source:   \u001b[0myara-python\u001b[0m\r\n\u001b[1m  Report:   \u001b[0m\u001b[34mTP-2026-018\u001b[0m\r\n\u001b[0m\r\n\u001b[1m\u001b[33m[MEDIUM]\u001b[0m  Finding 2/3\r\n\u001b[1m  Location: \u001b[0m\u001b[1m\u001b[36mmodels/User.js.fixture:3\u001b[0m\r\n\u001b[1m  Why:      \u001b[0mA literal character-code array statically decodes to a URL; its use and\u001b[0m\r\n            destination require review.\u001b[0m\r\n\u001b[1m  Match:    \u001b[0m\u001b[1m\u001b[36mline 3\u001b[0m | byte 166 | 119 bytes | numeric-url-array\r\n\u001b[1m  Review:   \u001b[0mobfuscation | confidence: high\u001b[0m\r\n\u001b[1m  Rule:     \u001b[0mREVIEW_Encoded_Character_Array\u001b[0m\r\n\u001b[1m  Source:   \u001b[0mstatic-review\u001b[0m\r\n\u001b[1m  Report:   \u001b[0m\u001b[34mTP-2026-018\u001b[0m\r\n\u001b[0m\r\n\u001b[1m\u001b[34m[LOW]\u001b[0m  Finding 3/3\r\n\u001b[1m  Location: \u001b[0m\u001b[1m\u001b[36mcontrollers/users.js.fixture:7\u001b[0m\r\n\u001b[1m  Why:      \u001b[0mCharacter-code construction can conceal strings or perform ordinary text\u001b[0m\r\n            handling.\u001b[0m\r\n\u001b[1m  Match:    \u001b[0m\u001b[1m\u001b[36mline 7\u001b[0m | byte 331 | 20 bytes | character-decoder\r\n\u001b[1m  Review:   \u001b[0mobfuscation | confidence: medium\u001b[0m\r\n\u001b[1m  Rule:     \u001b[0mREVIEW_Character_Code_Decoder\u001b[0m\r\n\u001b[1m  Source:   \u001b[0mstatic-review\u001b[0m\r\n\u001b[0m\r\n\u001b[1mCOVERAGE\u001b[0m\r\n\u001b[1m  Skipped:  \u001b[0m0 ignored entries, 0 oversized, 0 symlinks, 0 special files\u001b[0m\r\n\u001b[1m  Scope:    \u001b[0mCompleteness applies to the selected policy; no findings is not a safety\u001b[0m\r\n            guarantee.\u001b[0m\r\n\u001b[0m\r\n\u001b[1mSUMMARY\u001b[0m\r\n\u001b[1mVerdict:  \u001b[0m\u001b[1m\u001b[33mreview-needed\u001b[0m\r\n\u001b[1mFindings: \u001b[0m3 across 2 files\u001b[0m\r\n\u001b[1mSeverity: \u001b[0m\u001b[1m\u001b[31m[HIGH 1]\u001b[0m  \u001b[1m\u001b[33m[MEDIUM 1]\u001b[0m  \u001b[1m\u001b[34m[LOW 1]\u001b[0m\r\n\u001b[1mScanned:  \u001b[0m2/2 selected files\u001b[0m\r\n\u001b[1mStatus:   \u001b[0mcomplete | scope complete: yes\u001b[0m\r\n\u001b[0m\r\n\u001b[1mNext:     \u001b[0mReview the flagged files and their execution context before running the\u001b[0m\r\n          project.\u001b[0m\r\n\u001b[1mExit code: 1\u001b[0m\r\n",
+    "stderr": "RepoScan launcher: downloading uv-0.13.7-x86_64-unknown-linux-gnu.tar.gz\nRepoScan launcher: downloading threatprophet_reposcan-0.4.0-py3-none-any.whl\nRepoScan launcher: checking private RepoScan 0.4.0 / YARA 4.5.4 runtime\nDownloading cpython-3.12.16-linux-x86_64-gnu (download) (32.9MiB)\n Downloaded cpython-3.12.16-linux-x86_64-gnu (download)\nDownloading yara-python (2.2MiB)\n Downloaded yara-python\nInstalled 2 packages in 1ms\n"
+  }
+}

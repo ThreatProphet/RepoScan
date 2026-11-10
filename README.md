@@ -99,16 +99,17 @@ package on PyPI is not this project.
 
 ## Watch a scan
 
-![RepoScan reviewing benign and inert Web3Market fixtures](docs/assets/reposcan-demo.gif)
+![RepoScan 0.4.0: download the launcher, scan an inert Web3Market fixture, then review the findings and summary](docs/assets/reposcan-demo.gif)
 
-This **pre-release demonstration** replays captured CLI output of the terminal
-layout included in 0.3.1. Its original development-version label is retained.
-The demo scans public fixtures as file data. The Web3Market example produces
-three findings across two files and a `review-needed` result with exit code `1`.
-A scan with no findings is not a guarantee of safety.
+This demo follows the two-step quick start above using **RepoScan 0.4.0**.
+It replays real captured terminal output, with download and first-run setup
+waits shortened. The public inert Web3Market fixture produces three findings
+across two files; coverage and the summary follow the findings, ending with
+`review-needed` and exit code `1`. A scan with no findings is not a guarantee
+of safety.
 
 [MP4 video](docs/assets/reposcan-demo.mp4) ·
-[Reproduce the recording](docs/demo.md) · [Recording source](docs/demo.tape) ·
+[Reproduce the recording](docs/demo.md) · [Rendering source](tools/render_demo.py) ·
 [Full text result](examples/web3market.txt) ·
 [Web3Market case study](docs/web3market.md)
 
