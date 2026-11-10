@@ -8,6 +8,9 @@
   wheel and its verified SHA-256, and updated the source-launcher instructions.
 - Updated the pinned checkout and Python setup actions to releases that declare
   Node 24, retaining the existing CI matrix and release qualification gates.
+- Refreshed the GIF, MP4 and poster for the RepoScan 0.4.0 download-and-scan
+  flow, current terminal colors and summary at the end. Added tools and
+  contributor instructions to capture real output and reproduce the media.
 
 ## 0.4.0 - 2026-11-09
 
